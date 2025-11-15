@@ -16,7 +16,7 @@ const getSupabaseClient = (): SupabaseClient | null => {
         return supabase;
     }
     
-    console.warn("Supabase client is not configured. Please provide credentials.");
+    console.warn("Supabase credentials not found in session storage. Waiting for user configuration.");
     return null;
 };
 

@@ -190,7 +190,79 @@ const ScrollToTop: React.FC = () => {
   return null;
 };
 
+const SupabaseConfigurator: React.FC = () => {
+    const [url, setUrl] = useState('');
+    const [anonKey, setAnonKey] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (url && anonKey) {
+            sessionStorage.setItem('SUPABASE_URL', url);
+            sessionStorage.setItem('SUPABASE_ANON_KEY', anonKey);
+            window.location.reload();
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-soft">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg border">
+                <div className="text-center">
+                    <div className="inline-flex justify-center items-center gap-2">
+                        <LogoIcon />
+                        <h2 className="text-2xl font-bold font-poppins text-text-dark">Konfigurasi Database</h2>
+                    </div>
+                    <p className="mt-2 text-sm text-text-muted">Masukkan kredensial Supabase Anda untuk memulai aplikasi.</p>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                        <label htmlFor="supabase-url" className="block text-sm font-medium text-text-dark mb-1">Supabase URL</label>
+                        <input
+                            id="supabase-url"
+                            type="url"
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            required
+                            placeholder="https://<id-proyek>.supabase.co"
+                            className="w-full bg-primary-light border border-gray-300 rounded-md p-2.5 text-sm text-text-dark placeholder-gray-400 focus:ring-accent-blue focus:border-accent-blue"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="supabase-key" className="block text-sm font-medium text-text-dark mb-1">Supabase Anon Key</label>
+                        <input
+                            id="supabase-key"
+                            type="text"
+                            value={anonKey}
+                            onChange={(e) => setAnonKey(e.target.value)}
+                            required
+                            placeholder="eyJ..."
+                            className="w-full bg-primary-light border border-gray-300 rounded-md p-2.5 text-sm text-text-dark placeholder-gray-400 focus:ring-accent-blue focus:border-accent-blue"
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-accent-blue text-white font-poppins font-semibold py-2.5 rounded-lg hover:bg-accent-blue-hover transition-all duration-300">
+                        Simpan & Lanjutkan
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+
 const App: React.FC = () => {
+    const [isConfigured, setIsConfigured] = useState(false);
+
+    useEffect(() => {
+        const url = sessionStorage.getItem('SUPABASE_URL');
+        const key = sessionStorage.getItem('SUPABASE_ANON_KEY');
+        if (url && key) {
+            setIsConfigured(true);
+        }
+    }, []);
+
+    if (!isConfigured) {
+        return <SupabaseConfigurator />;
+    }
+
     return (
         <HashRouter>
             <ScrollToTop />
