@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { getDetailedLandslideData } from '../data/database';
-import { DetailedLandslideEvent, MonthlyStat, ProvinceStat } from '../types';
+import { DetailedLandslideEvent, ProvinceStat } from '../types';
 
 const PageHeader: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
     <div className="bg-secondary-light py-12 border-b border-gray-200">
@@ -213,7 +213,7 @@ const StatsPage: React.FC = () => {
                                     nameKey="name"
                                     label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                                 >
-                                    {provinceDistribution.map((entry, index) => (
+                                    {provinceDistribution.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>

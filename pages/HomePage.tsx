@@ -7,7 +7,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination as SwiperPagination, Autoplay, EffectFade } from 'swiper/modules';
 
 import { getNewsData, getOfficialLandslideData, getDetailedLandslideData } from '../data/database';
-import { NewsArticle, LandslideFeatureCollection, DetailedLandslideEvent } from '../types';
+import { NewsArticle, LandslideFeatureCollection } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '../constants';
 
 const orangeIcon = new L.Icon({

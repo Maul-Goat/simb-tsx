@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, NavLink, useLocation, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import MapPage from './pages/MapPage';
 import StatsPage from './pages/StatsPage';
