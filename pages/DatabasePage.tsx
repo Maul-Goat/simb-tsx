@@ -164,7 +164,7 @@ const KejadianManager: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const [coordsStr, setCoordsStr] = formState.coordinates;
+            const [coordsStr] = formState.coordinates;
              if (!coordsStr.includes(',')) {
                 alert('Format Koordinat harus "latitude, longitude"');
                 return;
