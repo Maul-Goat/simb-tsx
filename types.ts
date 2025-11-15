@@ -64,3 +64,11 @@ export interface DetailedLandslideEvent {
   rumahTerendam: number;
   fasumRusak: number;
 }
+
+export interface KnowledgeArticle {
+  id: number;
+  category: string;
+  title: string;
+  content: string;
+  image?: string;
+}

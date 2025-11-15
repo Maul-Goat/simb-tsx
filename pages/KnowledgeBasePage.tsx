@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { newsData } from '../data/database';
-import { NewsArticle } from '../types';
+import { getNewsData, getKnowledgeData } from '../data/database';
+import { NewsArticle, KnowledgeArticle } from '../types';
 import { Pagination } from './HomePage';
 import { XIcon } from '../constants';
 
@@ -52,9 +52,27 @@ const NewsDetailModal: React.FC<{ article: NewsArticle; onClose: () => void }> =
 };
 
 const NewsSection: React.FC = () => {
+    const [newsData, setNewsData] = useState<NewsArticle[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedNews, setSelectedNews] = useState<NewsArticle | null>(null);
     const articlesPerPage = 6;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await getNewsData();
+                setNewsData(data);
+            } catch (error) {
+                console.error("Failed to load news:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
     const totalPages = Math.ceil(newsData.length / articlesPerPage);
     const currentArticles = newsData.slice((currentPage - 1) * articlesPerPage, currentPage * articlesPerPage);
 
@@ -66,6 +84,10 @@ const NewsSection: React.FC = () => {
     const handleCloseModal = () => {
         setSelectedNews(null);
     };
+
+    if (isLoading) {
+        return <div className="text-center p-8">Memuat berita...</div>;
+    }
 
     return (
         <>
@@ -96,51 +118,44 @@ const NewsSection: React.FC = () => {
 const InfoBox: React.FC<{ title: string, borderColor: string, children: React.ReactNode }> = ({ title, borderColor, children }) => (
     <div className={`bg-secondary-light border-l-4 ${borderColor} p-6 rounded-xl shadow-lg hover:shadow-xl border border-gray-200 transition transform hover:-translate-y-1 duration-300`}>
         <h3 className="text-xl font-poppins font-semibold text-text-dark mb-2">{title}</h3>
-        <div className="text-text-muted leading-relaxed space-y-4">
-            {children}
-        </div>
+        <div className="text-text-muted leading-relaxed space-y-4 prose" dangerouslySetInnerHTML={{ __html: children as string }} />
     </div>
 );
 
-const KnowledgeSection: React.FC = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <InfoBox title="Definisi Bencana" borderColor="border-green-info">
-            <p>Bencana adalah peristiwa atau rangkaian peristiwa yang mengancam dan mengganggu kehidupan dan penghidupan masyarakat yang disebabkan, baik oleh faktor alam dan/atau faktor nonalam maupun faktor manusia sehingga mengakibatkan timbulnya korban jiwa, kerusakan lingkungan, dan kerugian harta benda. (UU No. 24 Tahun 2007)</p>
-        </InfoBox>
-        <InfoBox title="Potensi Ancaman di Indonesia" borderColor="border-orange-warning">
-             <p>Indonesia terletak pada pertemuan tiga lempeng tektonik utama dunia, menjadikannya salah satu negara paling rawan bencana dengan potensi ancaman seperti gempa bumi, tsunami, letusan gunung api, banjir, dan tanah longsor.</p>
-        </InfoBox>
-        <div className="md:col-span-2">
-            <img src="https://picsum.photos/seed/mapindo/1200/400" alt="Peta Ancaman Bencana Indonesia" className="rounded-lg shadow-lg w-full object-cover h-64 border border-gray-200" />
-        </div>
-    </div>
-);
+const DynamicKnowledgeSection: React.FC<{ category: 'pengetahuan' | 'mitigasi' | 'penanggulangan' | 'pengertian' | 'penyebab' }> = ({ category }) => {
+    const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-const LandslideSection: React.FC = () => (
-     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <InfoBox title="Apa itu Tanah Longsor?" borderColor="border-green-info">
-            <p>Tanah longsor merupakan salah satu jenis gerakan massa tanah atau batuan, menuruni atau keluar lereng akibat terganggunya kestabilan tanah atau batuan penyusun lereng.</p>
-        </InfoBox>
-        <InfoBox title="Penyebab & Pemicu" borderColor="border-orange-warning">
-            <ul className="list-disc list-inside text-sm">
-                <li>Curah Hujan Tinggi</li>
-                <li>Lereng Terjal</li>
-                <li>Jenis Tanah Rentan</li>
-                <li>Getaran (Gempa, dll)</li>
-                <li>Aktivitas Manusia</li>
-            </ul>
-        </InfoBox>
-        <InfoBox title="Upaya Mitigasi & Pencegahan" borderColor="border-accent-blue">
-             <ul className="list-disc list-inside text-sm">
-                <li>Tanam vegetasi penahan lereng</li>
-                <li>Buat terasering (sengkedan)</li>
-                <li>Perbaiki sistem drainase</li>
-                <li>Hindari membangun di area rawan</li>
-                <li>Waspada tanda-tanda awal</li>
-            </ul>
-        </InfoBox>
-    </div>
-);
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const allKnowledge = await getKnowledgeData();
+                const filtered = allKnowledge.filter(item => item.category === category);
+                setArticles(filtered);
+            } catch (error) {
+                console.error(`Failed to load category ${category}:`, error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [category]);
+    
+    if (isLoading) {
+        return <div className="text-center p-8">Memuat informasi...</div>;
+    }
+
+    return (
+        <div className="space-y-8">
+            {articles.map(article => (
+                <InfoBox key={article.id} title={article.title} borderColor="border-green-info">
+                   {article.content}
+                </InfoBox>
+            ))}
+        </div>
+    );
+};
 
 
 const KnowledgeBasePage: React.FC = () => {
@@ -164,6 +179,20 @@ const KnowledgeBasePage: React.FC = () => {
         }
     }, [location.hash]);
 
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'Longsor':
+                return <DynamicKnowledgeSection category="pengertian" />;
+            case 'Pengetahuan':
+                // FIX: Changed category from "informasi umum" to "pengetahuan" to match the component's expected prop types.
+                return <DynamicKnowledgeSection category="pengetahuan" />;
+            case 'Berita':
+                return <NewsSection />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="bg-primary-light min-h-screen">
             <PageHeader title="Pusat Pengetahuan" subtitle="Informasi komprehensif mengenai berita, kebencanaan, dan mitigasi tanah longsor." />
@@ -178,9 +207,7 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
 
                 <div className="transition-opacity duration-300">
-                    {activeTab === 'Longsor' && <LandslideSection />}
-                    {activeTab === 'Pengetahuan' && <KnowledgeSection />}
-                    {activeTab === 'Berita' && <NewsSection />}
+                    {renderContent()}
                 </div>
             </div>
         </div>

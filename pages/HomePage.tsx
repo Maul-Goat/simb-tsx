@@ -6,8 +6,8 @@ import CountUp from 'react-countup';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination as SwiperPagination, Autoplay, EffectFade } from 'swiper/modules';
 
-import { newsData, getOfficialLandslideData } from '../data/database';
-import { NewsArticle, LandslideFeatureCollection } from '../types';
+import { getNewsData, getOfficialLandslideData, getDetailedLandslideData } from '../data/database';
+import { NewsArticle, LandslideFeatureCollection, DetailedLandslideEvent } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '../constants';
 
 const orangeIcon = new L.Icon({
@@ -131,13 +131,17 @@ export const Pagination: React.FC<{ currentPage: number, totalPages: number, onP
 
 
 const HomePage: React.FC = () => {
+    const [newsData, setNewsData] = useState<NewsArticle[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedNews, setSelectedNews] = useState<NewsArticle | null>(null);
     const [landslideData, setLandslideData] = useState<LandslideFeatureCollection | null>(null);
+    const [stats, setStats] = useState({ totalKejadian: 0, korbanJiwa: 0, provinsiTerdampak: 0 });
     const [isLoadingMap, setIsLoadingMap] = useState(true);
+    const [isLoadingNews, setIsLoadingNews] = useState(true);
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchMapData = async () => {
             setIsLoadingMap(true);
             try {
                 const data = await getOfficialLandslideData();
@@ -148,7 +152,37 @@ const HomePage: React.FC = () => {
                 setIsLoadingMap(false);
             }
         };
-        fetchData();
+
+        const fetchNewsData = async () => {
+            setIsLoadingNews(true);
+            try {
+                const data = await getNewsData();
+                setNewsData(data);
+            } catch (error) {
+                console.error("Failed to fetch news data:", error);
+            } finally {
+                setIsLoadingNews(false);
+            }
+        };
+        
+        const fetchStatsData = async () => {
+            setIsLoadingStats(true);
+            try {
+                const detailedData = await getDetailedLandslideData();
+                const totalKejadian = detailedData.length;
+                const korbanJiwa = detailedData.reduce((sum, event) => sum + event.meninggal, 0);
+                const provinsiTerdampak = new Set(detailedData.map(event => event.provinsi)).size;
+                setStats({ totalKejadian, korbanJiwa, provinsiTerdampak });
+            } catch (error) {
+                console.error("Failed to fetch stats data:", error);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchMapData();
+        fetchNewsData();
+        fetchStatsData();
     }, []);
 
     const articlesPerPage = 3;
@@ -175,21 +209,27 @@ const HomePage: React.FC = () => {
             </div>
 
             <Section title="Berita Terbaru" className="bg-gray-soft">
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {currentArticles.map(article => <NewsCard key={article.id} article={article} onReadMore={handleReadMore} />)}
-                </div>
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                <div className="text-center mt-8">
-                    <Link 
-                        to="/pengetahuan#berita" 
-                        className="inline-block bg-accent-blue text-white font-poppins font-medium px-8 py-3 rounded-lg hover:bg-accent-blue-hover transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-blue/40"
-                    >
-                        Lihat Semua Berita
-                    </Link>
-                </div>
+                {isLoadingNews ? (
+                    <div className="text-center text-text-muted">Memuat berita...</div>
+                ) : (
+                    <>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {currentArticles.map(article => <NewsCard key={article.id} article={article} onReadMore={handleReadMore} />)}
+                        </div>
+                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                        <div className="text-center mt-8">
+                            <Link 
+                                to="/pengetahuan#berita" 
+                                className="inline-block bg-accent-blue text-white font-poppins font-medium px-8 py-3 rounded-lg hover:bg-accent-blue-hover transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-blue/40"
+                            >
+                                Lihat Semua Berita
+                            </Link>
+                        </div>
+                    </>
+                )}
             </Section>
             
-            <Section title="Peta Sebaran Longsor" subtitle="Pantau lokasi kejadian tanah longsor aktif di seluruh Indonesia berdasarkan data terbaru dari BNPB.">
+            <Section title="Peta Sebaran Longsor" subtitle="Pantau lokasi kejadian tanah longsor aktif di seluruh Indonesia berdasarkan data terbaru.">
                 <div className="h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative">
                     {isLoadingMap ? (
                         <div className="flex items-center justify-center h-full bg-gray-soft">
@@ -218,27 +258,31 @@ const HomePage: React.FC = () => {
                 </div>
             </Section>
             
-            <Section title="Statistik Kejadian 2 Tahun Terakhir" className="bg-gray-soft">
+            <Section title="Statistik Kejadian" className="bg-gray-soft">
+                {isLoadingStats ? (
+                    <div className="text-center text-text-muted">Memuat statistik...</div>
+                ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     <div className="bg-secondary-light p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-warning/20">
                         <h3 className="text-5xl font-poppins font-bold text-orange-warning">
-                            <CountUp end={1253} duration={3} enableScrollSpy />
+                            <CountUp end={stats.totalKejadian} duration={3} enableScrollSpy />
                         </h3>
                         <p className="mt-2 text-lg text-text-muted">Total Kejadian</p>
                     </div>
                      <div className="bg-secondary-light p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-warning/20">
                         <h3 className="text-5xl font-poppins font-bold text-orange-warning">
-                             <CountUp end={432} duration={3} enableScrollSpy />
+                             <CountUp end={stats.korbanJiwa} duration={3} enableScrollSpy />
                         </h3>
                         <p className="mt-2 text-lg text-text-muted">Korban Jiwa</p>
                     </div>
                      <div className="bg-secondary-light p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-warning/20">
                         <h3 className="text-5xl font-poppins font-bold text-orange-warning">
-                             <CountUp end={34} duration={3} enableScrollSpy />
+                             <CountUp end={stats.provinsiTerdampak} duration={3} enableScrollSpy />
                         </h3>
                         <p className="mt-2 text-lg text-text-muted">Provinsi Terdampak</p>
                     </div>
                 </div>
+                )}
             </Section>
 
             <Section title="Pengetahuan Mitigasi Bencana" subtitle="Tingkatkan pemahaman Anda untuk mengurangi risiko dan dampak dari bencana tanah longsor.">
