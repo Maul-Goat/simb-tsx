@@ -3,21 +3,17 @@ import { LandslideFeatureCollection, NewsArticle, UserReport, LandslideDataPoint
 
 let supabase: SupabaseClient | null = null;
 
-const getSupabaseClient = (): SupabaseClient | null => {
+// Hardcoded Supabase credentials
+const supabaseUrl = 'https://gzjnusvsbzdsjffmiebu.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6am51c3ZzYnpkc2pmZm1pZWJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjQyNDIsImV4cCI6MjA3ODcwMDI0Mn0.q7-G3Q9pwbCCoiU-F9EFaRwsZkzZuEBOYyxEpQIfaDo';
+
+
+const getSupabaseClient = (): SupabaseClient => {
     if (supabase) {
         return supabase;
     }
-
-    const supabaseUrl = sessionStorage.getItem('SUPABASE_URL');
-    const supabaseAnonKey = sessionStorage.getItem('SUPABASE_ANON_KEY');
-
-    if (supabaseUrl && supabaseAnonKey) {
-        supabase = createClient(supabaseUrl, supabaseAnonKey);
-        return supabase;
-    }
-    
-    console.warn("Supabase credentials not found in session storage. Waiting for user configuration.");
-    return null;
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+    return supabase;
 };
 
 

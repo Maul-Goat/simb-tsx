@@ -1,24 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { getPendingUserReports, approveUserReport, rejectUserReport, addOfficialLandslide } from '../data/database';
-import { UserReport } from '../types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+    getPendingUserReports, 
+    approveUserReport, 
+    rejectUserReport, 
+    getNewsData,
+    getDetailedLandslideData,
+    getKnowledgeData,
+    deleteBerita,
+    deleteKejadian,
+    deleteMateri,
+    addBerita,
+    addOfficialLandslide,
+    addMateri
+} from '../data/database';
+import { UserReport, NewsArticle, DetailedLandslideEvent, KnowledgeArticle } from '../types';
 
-const AdminPage: React.FC = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+type Tab = 'laporan' | 'berita' | 'kejadian' | 'materi';
+
+const TabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode; }> = ({ active, onClick, children }) => (
+    <button
+        onClick={onClick}
+        className={`px-4 py-2 text-sm font-poppins font-medium rounded-md transition-colors duration-200 focus:outline-none ${
+            active
+                ? 'bg-accent-blue text-white shadow-md'
+                : 'bg-gray-200 text-text-muted hover:bg-gray-300 hover:text-text-dark'
+        }`}
+    >
+        {children}
+    </button>
+);
+
+const Section: React.FC<{ title: string; children: React.ReactNode; className?: string; }> = ({ title, children, className }) => (
+    <section className={`bg-secondary-light p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 ${className}`}>
+        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-dark">{title}</h2>
+        {children}
+    </section>
+);
+
+const LaporanManager: React.FC = () => {
     const [pendingReports, setPendingReports] = useState<UserReport[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [processingReportId, setProcessingReportId] = useState<number | null>(null);
 
-    // Form state for adding new official landslide
-    const [newLocationName, setNewLocationName] = useState('');
-    const [newCoordinates, setNewCoordinates] = useState('');
-    const [newDate, setNewDate] = useState('');
-    const [newCasualties, setNewCasualties] = useState(0);
-    const [newInjured, setNewInjured] = useState(0);
-    const [newDamagedHomes, setNewDamagedHomes] = useState(0);
-    
-    const fetchPendingReports = async () => {
+    const fetchPendingReports = useCallback(async () => {
         setIsLoading(true);
         try {
             const reports = await getPendingUserReports();
@@ -29,24 +53,11 @@ const AdminPage: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchPendingReports();
-        }
-    }, [isAuthenticated]);
-
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Simple hardcoded password check
-        if (password === 'admin123') {
-            setIsAuthenticated(true);
-            setError('');
-        } else {
-            setError('Password salah!');
-        }
-    };
+        fetchPendingReports();
+    }, [fetchPendingReports]);
 
     const handleApprove = async (id: number) => {
         if (processingReportId) return;
@@ -89,43 +100,272 @@ const AdminPage: React.FC = () => {
              }
         }
     };
+
+    return (
+        <Section title="Laporan Masyarakat (Pending)">
+            {isLoading ? (
+                 <p className="text-text-muted">Memuat laporan...</p>
+            ) : pendingReports.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {pendingReports.map(report => {
+                        const isProcessing = processingReportId === report.id;
+                        return (
+                        <div key={report.id} className="bg-primary-light/50 p-5 rounded-xl border flex flex-col justify-between">
+                            <div>
+                                <div className="font-semibold text-text-dark font-poppins">{report.name}</div>
+                                <div className="text-xs text-text-muted mb-2">ID Laporan: {report.id}</div>
+                                <p className="text-sm text-text-dark my-2 break-words">&quot;{report.description}&quot;</p>
+                                <a 
+                                    href={`https://www.google.com/maps?q=${report.latlng[0]},${report.latlng[1]}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-accent-blue hover:underline"
+                                >
+                                    Lokasi: {report.latlng[0].toFixed(4)}, {report.latlng[1].toFixed(4)}
+                                </a>
+                            </div>
+                            <div className="flex justify-end space-x-2 mt-4">
+                                <button 
+                                    onClick={() => handleReject(report.id)} 
+                                    disabled={isProcessing}
+                                    className="px-3 py-1 text-xs font-semibold text-text-muted bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                >
+                                    {isProcessing ? 'Memproses...' : 'Tolak'}
+                                </button>
+                                <button 
+                                    onClick={() => handleApprove(report.id)} 
+                                    disabled={isProcessing}
+                                    className="px-3 py-1 text-xs font-semibold text-white bg-green-info hover:bg-green-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                >
+                                    {isProcessing ? 'Memproses...' : 'Setujui'}
+                                </button>
+                            </div>
+                        </div>
+                    )})}
+                </div>
+            ) : (
+                <p className="text-text-muted">Tidak ada laporan yang menunggu peninjauan.</p>
+            )}
+        </Section>
+    )
+};
+
+const BeritaManager: React.FC = () => {
+    const [data, setData] = useState<NewsArticle[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     
-    const handleAddLandslide = async (e: React.FormEvent) => {
+    const [judul, setJudul] = useState('');
+    const [isi, setIsi] = useState('');
+    const [gambar, setGambar] = useState('');
+    const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
+
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try { setData(await getNewsData()); } 
+        catch (error) { console.error(error); alert('Gagal memuat data berita.'); } 
+        finally { setIsLoading(false); }
+    }, []);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Yakin ingin menghapus berita ini?')) {
+            if (await deleteBerita(id)) { alert('Berita berhasil dihapus.'); fetchData(); } 
+            else { alert('Gagal menghapus berita.'); }
+        }
+    };
+    
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (!newCoordinates.includes(',')) {
-                alert('Format Koordinat harus "latitude, longitude"');
-                return;
-            }
-            
-            const coordsArray = newCoordinates.split(',').map(coord => parseFloat(coord.trim()));
-            if (coordsArray.length !== 2 || isNaN(coordsArray[0]) || isNaN(coordsArray[1])) {
-                alert('Koordinat tidak valid. Pastikan formatnya benar.');
-                return;
-            }
+            await addBerita({ judul, isi, gambar, tanggal });
+            alert('Berita berhasil ditambahkan!');
+            setJudul(''); setIsi(''); setGambar(''); setTanggal(new Date().toISOString().slice(0, 10));
+            fetchData();
+        } catch (error) { alert('Gagal menambahkan berita.'); }
+    };
 
-            await addOfficialLandslide({
-                lokasi: newLocationName,
-                tanggal: newDate,
-                korban_meninggal: newCasualties,
-                korban_luka: newInjured,
-                kerusakan_rumah: newDamagedHomes,
-                coordinates: [coordsArray[0], coordsArray[1]]
-            });
-            // Reset form
-            setNewLocationName('');
-            setNewCoordinates('');
-            setNewDate('');
-            setNewCasualties(0);
-            setNewInjured(0);
-            setNewDamagedHomes(0);
-            alert('Data kejadian berhasil ditambahkan!');
-        } catch(err) {
-            alert('Gagal menambahkan data. Pastikan format koordinat benar.');
-            console.error(err);
+    return (
+        <div>
+            <Section title="Tambah Berita Baru">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm" />
+                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Berita" className="md:col-span-2 w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm" />
+                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Berita" rows={4} className="md:col-span-2 w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm"></textarea>
+                    <input type="url" value={gambar} onChange={e => setGambar(e.target.value)} placeholder="URL Gambar (opsional)" className="md:col-span-2 w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm" />
+                    <button type="submit" className="md:col-span-2 w-full bg-accent-blue text-white font-semibold py-2 rounded-lg hover:bg-accent-blue-hover">Tambah Berita</button>
+                </form>
+            </Section>
+            <Section title="Data Berita Tersimpan" className="mt-8">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-soft"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {isLoading ? (<tr><td colSpan={3} className="p-4 text-center">Memuat...</td></tr>) : 
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.date}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-red-500 hover:underline">Hapus</button></td></tr>))}
+                        </tbody>
+                    </table>
+                </div>
+            </Section>
+        </div>
+    );
+};
+
+const KejadianManager: React.FC = () => {
+    const [data, setData] = useState<DetailedLandslideEvent[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [lokasi, setLokasi] = useState('');
+    const [coordinates, setCoordinates] = useState('');
+    const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
+    const [korbanMeninggal, setKorbanMeninggal] = useState(0);
+    const [korbanLuka, setKorbanLuka] = useState(0);
+    const [rumahRusak, setRumahRusak] = useState(0);
+
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try { setData(await getDetailedLandslideData()); } 
+        catch (error) { console.error(error); alert('Gagal memuat data kejadian.'); } 
+        finally { setIsLoading(false); }
+    }, []);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Yakin ingin menghapus data kejadian ini?')) {
+            if (await deleteKejadian(id)) { alert('Data kejadian berhasil dihapus.'); fetchData(); } 
+            else { alert('Gagal menghapus data kejadian.'); }
         }
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (!coordinates.includes(',')) { alert('Format Koordinat harus "latitude, longitude"'); return; }
+            const coordsArray = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+            if (coordsArray.length !== 2 || isNaN(coordsArray[0]) || isNaN(coordsArray[1])) { alert('Koordinat tidak valid.'); return; }
+
+            await addOfficialLandslide({ lokasi, tanggal, korban_meninggal: korbanMeninggal, korban_luka: korbanLuka, kerusakan_rumah: rumahRusak, coordinates: [coordsArray[0], coordsArray[1]] });
+            
+            alert('Data kejadian berhasil ditambahkan!');
+            setLokasi(''); setCoordinates(''); setTanggal(new Date().toISOString().slice(0,10));
+            setKorbanMeninggal(0); setKorbanLuka(0); setRumahRusak(0);
+
+            fetchData();
+        } catch (err) { alert('Gagal menambahkan data.'); console.error(err); }
+    };
+    
+    return (
+        <div>
+            <Section title="Tambah Kejadian Bencana Resmi">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <input type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Nama Lokasi, Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <input type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Koordinat, Contoh: -6.59, 106.8" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <input type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(parseInt(e.target.value))} required placeholder="Rumah Rusak" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <input type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(parseInt(e.target.value))} required placeholder="Korban Meninggal" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <input type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(parseInt(e.target.value))} required placeholder="Korban Luka" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <button type="submit" className="md:col-span-2 w-full bg-accent-blue text-white font-semibold py-2 rounded-lg hover:bg-accent-blue-hover">Tambah Kejadian</button>
+                </form>
+            </Section>
+            <Section title="Data Kejadian Tersimpan" className="mt-8">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-soft"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Lokasi</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Meninggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                         <tbody className="bg-white divide-y divide-gray-200">
+                            {isLoading ? (<tr><td colSpan={4} className="p-4 text-center">Memuat...</td></tr>) : 
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.lokasi}</td><td className="px-4 py-2 text-sm">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID')}</td><td className="px-4 py-2 text-sm text-center">{item.meninggal}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-red-500 hover:underline">Hapus</button></td></tr>))}
+                        </tbody>
+                    </table>
+                </div>
+            </Section>
+        </div>
+    )
+};
+
+const MateriManager: React.FC = () => {
+    const [data, setData] = useState<KnowledgeArticle[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [kategori, setKategori] = useState<'pengertian' | 'penyebab' | 'penanggulangan' | 'mitigasi' | 'informasi umum'>('pengertian');
+    const [judul, setJudul] = useState('');
+    const [isi, setIsi] = useState('');
+
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try { setData(await getKnowledgeData()); } 
+        catch (error) { console.error(error); alert('Gagal memuat data materi.'); } 
+        finally { setIsLoading(false); }
+    }, []);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Yakin ingin menghapus materi ini?')) {
+            if (await deleteMateri(id)) { alert('Materi berhasil dihapus.'); fetchData(); } 
+            else { alert('Gagal menghapus materi.'); }
+        }
+    };
+    
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await addMateri({ kategori, judul, isi });
+            alert('Materi berhasil ditambahkan!');
+            setJudul(''); setIsi('');
+            fetchData();
+        } catch (error) { alert('Gagal menambahkan materi.'); }
+    };
+
+    return (
+        <div>
+            <Section title="Tambah Materi Edukasi Baru">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <select value={kategori} onChange={e => setKategori(e.target.value as any)} className="w-full bg-primary-light border p-2 rounded-md text-sm">
+                        <option value="pengertian">Pengertian</option>
+                        <option value="penyebab">Penyebab</option>
+                        <option value="penanggulangan">Penanggulangan</option>
+                        <option value="mitigasi">Mitigasi</option>
+                        <option value="informasi umum">Informasi Umum</option>
+                    </select>
+                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Materi" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
+                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Materi (HTML didukung)" rows={5} className="md:col-span-2 w-full bg-primary-light border p-2 rounded-md text-sm"></textarea>
+                    <button type="submit" className="md:col-span-2 w-full bg-accent-blue text-white font-semibold py-2 rounded-lg hover:bg-accent-blue-hover">Tambah Materi</button>
+                </form>
+            </Section>
+             <Section title="Data Materi Tersimpan" className="mt-8">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-soft"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Kategori</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                         <tbody className="bg-white divide-y divide-gray-200">
+                            {isLoading ? (<tr><td colSpan={3} className="p-4 text-center">Memuat...</td></tr>) : 
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.category}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-red-500 hover:underline">Hapus</button></td></tr>))}
+                        </tbody>
+                    </table>
+                </div>
+            </Section>
+        </div>
+    )
+};
+
+
+const AdminPage: React.FC = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [activeTab, setActiveTab] = useState<Tab>('laporan');
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Simple hardcoded password check
+        if (password === 'admin123') {
+            setIsAuthenticated(true);
+            setError('');
+        } else {
+            setError('Password salah!');
+        }
+    };
+    
     if (!isAuthenticated) {
         return (
             <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-gray-soft">
@@ -157,94 +397,24 @@ const AdminPage: React.FC = () => {
             <div className="bg-secondary-light py-12 border-b border-gray-200">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h1 className="text-4xl font-poppins font-bold text-text-dark">Dasbor Admin</h1>
-                    <p className="mt-2 text-lg text-text-muted">Kelola laporan masyarakat dan data kejadian tanah longsor.</p>
+                    <p className="mt-2 text-lg text-text-muted">Kelola konten, data, dan laporan untuk seluruh aplikasi SIGLON.</p>
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-                {/* Pending Reports Section */}
-                <section>
-                    <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-dark">Laporan Masyarakat (Pending)</h2>
-                    {isLoading ? (
-                         <p className="text-text-muted bg-secondary-light p-6 rounded-lg border">Memuat laporan...</p>
-                    ) : pendingReports.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {pendingReports.map(report => {
-                                const isProcessing = processingReportId === report.id;
-                                return (
-                                <div key={report.id} className="bg-secondary-light p-5 rounded-xl shadow-lg border flex flex-col justify-between">
-                                    <div>
-                                        <div className="font-semibold text-text-dark font-poppins">{report.name}</div>
-                                        <div className="text-xs text-text-muted mb-2">ID Laporan: {report.id}</div>
-                                        <p className="text-sm text-text-dark my-2 break-words">&quot;{report.description}&quot;</p>
-                                        <a 
-                                            href={`https://www.google.com/maps?q=${report.latlng[0]},${report.latlng[1]}`} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-accent-blue hover:underline"
-                                        >
-                                            Lokasi: {report.latlng[0].toFixed(4)}, {report.latlng[1].toFixed(4)}
-                                        </a>
-                                    </div>
-                                    <div className="flex justify-end space-x-2 mt-4">
-                                        <button 
-                                            onClick={() => handleReject(report.id)} 
-                                            disabled={isProcessing}
-                                            className="px-3 py-1 text-xs font-semibold text-text-muted bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                                        >
-                                            {isProcessing ? 'Memproses...' : 'Tolak'}
-                                        </button>
-                                        <button 
-                                            onClick={() => handleApprove(report.id)} 
-                                            disabled={isProcessing}
-                                            className="px-3 py-1 text-xs font-semibold text-white bg-green-info hover:bg-green-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                                        >
-                                            {isProcessing ? 'Memproses...' : 'Setujui'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )})}
-                        </div>
-                    ) : (
-                        <p className="text-text-muted bg-secondary-light p-6 rounded-lg border">Tidak ada laporan yang menunggu peninjauan.</p>
-                    )}
-                </section>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                 <div className="flex space-x-2 border-b border-gray-200 pb-4">
+                    <TabButton active={activeTab === 'laporan'} onClick={() => setActiveTab('laporan')}>Laporan Pending</TabButton>
+                    <TabButton active={activeTab === 'berita'} onClick={() => setActiveTab('berita')}>Kelola Berita</TabButton>
+                    <TabButton active={activeTab === 'kejadian'} onClick={() => setActiveTab('kejadian')}>Kelola Kejadian</TabButton>
+                    <TabButton active={activeTab === 'materi'} onClick={() => setActiveTab('materi')}>Kelola Materi</TabButton>
+                </div>
                 
-                {/* Add New Landslide Section */}
-                 <section className="bg-secondary-light p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                    <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-dark">Tambah Kejadian Bencana Resmi</h2>
-                    <form onSubmit={handleAddLandslide} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="md:col-span-2">
-                            <label htmlFor="tanggal" className="block text-sm font-medium text-text-dark mb-1">Tanggal Kejadian</label>
-                            <input type="date" id="tanggal" value={newDate} onChange={e => setNewDate(e.target.value)} required className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm focus:ring-accent-blue focus:border-accent-blue" />
-                        </div>
-                        <div>
-                            <label htmlFor="lokasi-name" className="block text-sm font-medium text-text-dark mb-1">Nama Lokasi</label>
-                            <input type="text" id="lokasi-name" value={newLocationName} onChange={e => setNewLocationName(e.target.value)} required placeholder="Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm focus:ring-accent-blue focus:border-accent-blue" />
-                        </div>
-                         <div>
-                            <label htmlFor="coordinates" className="block text-sm font-medium text-text-dark mb-1">Koordinat (Latitude, Longitude)</label>
-                            <input type="text" id="coordinates" value={newCoordinates} onChange={e => setNewCoordinates(e.target.value)} required placeholder="-6.59, 106.8" className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm focus:ring-accent-blue focus:border-accent-blue" />
-                        </div>
-                        <div>
-                            <label htmlFor="kerusakanRumah" className="block text-sm font-medium text-text-dark mb-1">Rumah Rusak</label>
-                            <input type="number" min="0" id="kerusakanRumah" value={newDamagedHomes} onChange={e => setNewDamagedHomes(parseInt(e.target.value, 10))} required className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm focus:ring-accent-blue focus:border-accent-blue" />
-                        </div>
-                        <div>
-                            <label htmlFor="korbanMeninggal" className="block text-sm font-medium text-text-dark mb-1">Korban Meninggal</label>
-                            <input type="number" min="0" id="korbanMeninggal" value={newCasualties} onChange={e => setNewCasualties(parseInt(e.target.value, 10))} required className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm focus:ring-accent-blue focus:border-accent-blue" />
-                        </div>
-                         <div>
-                            <label htmlFor="korbanLuka" className="block text-sm font-medium text-text-dark mb-1">Korban Luka-Luka</label>
-                            <input type="number" min="0" id="korbanLuka" value={newInjured} onChange={e => setNewInjured(parseInt(e.target.value, 10))} required className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm focus:ring-accent-blue focus:border-accent-blue" />
-                        </div>
-                        <div className="md:col-span-2 text-right">
-                             <button type="submit" className="bg-accent-blue text-white font-poppins font-semibold py-2.5 px-6 rounded-lg hover:bg-accent-blue-hover transition-all duration-300">
-                                Tambah Data
-                            </button>
-                        </div>
-                    </form>
-                 </section>
+                <div className="mt-8">
+                    {activeTab === 'laporan' && <LaporanManager />}
+                    {activeTab === 'berita' && <BeritaManager />}
+                    {activeTab === 'kejadian' && <KejadianManager />}
+                    {activeTab === 'materi' && <MateriManager />}
+                </div>
             </div>
         </div>
     );

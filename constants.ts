@@ -14,7 +14,7 @@ export const NAV_LINKS = [
         ]
     },
     { name: 'Tentang Kami', path: '/tentang' },
-    { name: 'Database', path: '/database' },
+    { name: 'Admin', path: '/admin' },
 ];
 
 // Icons
