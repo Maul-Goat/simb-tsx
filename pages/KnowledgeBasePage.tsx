@@ -122,30 +122,11 @@ const InfoBox: React.FC<{ title: string, borderColor: string, children: React.Re
     </div>
 );
 
-const DynamicKnowledgeSection: React.FC<{ category: 'pengetahuan' | 'mitigasi' | 'penanggulangan' | 'pengertian' | 'penyebab' }> = ({ category }) => {
-    const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const allKnowledge = await getKnowledgeData();
-                const filtered = allKnowledge.filter(item => item.category === category);
-                setArticles(filtered);
-            } catch (error) {
-                console.error(`Failed to load category ${category}:`, error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchData();
-    }, [category]);
-    
-    if (isLoading) {
-        return <div className="text-center p-8">Memuat informasi...</div>;
+const KnowledgeContent: React.FC<{ articles: KnowledgeArticle[] }> = ({ articles }) => {
+    if (articles.length === 0) {
+        return <div className="text-center p-8 text-text-muted bg-secondary-light rounded-lg border">Tidak ada materi edukasi untuk kategori ini.</div>;
     }
-
+    
     return (
         <div className="space-y-8">
             {articles.map(article => (
@@ -160,8 +141,26 @@ const DynamicKnowledgeSection: React.FC<{ category: 'pengetahuan' | 'mitigasi' |
 
 const KnowledgeBasePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('Longsor');
+    const [allKnowledge, setAllKnowledge] = useState<KnowledgeArticle[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    
     const location = useLocation();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await getKnowledgeData();
+                setAllKnowledge(data);
+            } catch (error) {
+                console.error("Failed to fetch knowledge data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
 
     useEffect(() => {
         const hash = location.hash.substring(1); // remove #
@@ -180,12 +179,20 @@ const KnowledgeBasePage: React.FC = () => {
     }, [location.hash]);
 
     const renderContent = () => {
+        if (isLoading) {
+            return <div className="text-center p-8">Memuat informasi...</div>;
+        }
+    
         switch (activeTab) {
-            case 'Longsor':
-                return <DynamicKnowledgeSection category="pengertian" />;
-            case 'Pengetahuan':
-                // FIX: Changed category from "informasi umum" to "pengetahuan" to match the component's expected prop types.
-                return <DynamicKnowledgeSection category="pengetahuan" />;
+            case 'Longsor': {
+                const articles = allKnowledge.filter(item => item.category === 'pengertian');
+                return <KnowledgeContent articles={articles} />;
+            }
+            case 'Pengetahuan': {
+                const pengetahuanCategories = ['penyebab', 'penanggulangan', 'mitigasi', 'informasi umum'];
+                const articles = allKnowledge.filter(item => pengetahuanCategories.includes(item.category));
+                return <KnowledgeContent articles={articles} />;
+            }
             case 'Berita':
                 return <NewsSection />;
             default:
