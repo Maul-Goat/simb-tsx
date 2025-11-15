@@ -136,7 +136,8 @@ const MapPage: React.FC = () => {
                             key={`official-${point.properties.id}`} 
                             position={[point.geometry.coordinates[1], point.geometry.coordinates[0]]} 
                             icon={orangeIcon}
-                            ref={(el) => (markerRefs.current[point.properties.id] = el)}
+                            // FIX: The ref callback should not return a value. Using a block body to ensure it returns void.
+                            ref={(el) => { markerRefs.current[point.properties.id] = el; }}
                         >
                             <Popup>
                                 <div className="font-poppins">
