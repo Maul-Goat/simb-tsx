@@ -1,0 +1,262 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import CountUp from 'react-countup';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination as SwiperPagination, Autoplay, EffectFade } from 'swiper/modules';
+
+import { newsData, getOfficialLandslideData } from '../data/database';
+import { NewsArticle, LandslideFeatureCollection } from '../types';
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '../constants';
+
+const orangeIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+const Section: React.FC<{ children: React.ReactNode; className?: string; title: string; subtitle?: string; }> = ({ children, className = '', title, subtitle }) => (
+    <section className={`py-16 sm:py-24 ${className}`}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl font-poppins font-bold text-text-dark sm:text-4xl">{title}</h2>
+                {subtitle && <p className="mt-4 text-lg text-text-muted max-w-3xl mx-auto">{subtitle}</p>}
+            </div>
+            {children}
+        </div>
+    </section>
+);
+
+const HeroCarousel: React.FC = () => {
+    return (
+        <div className="relative h-[50vh] min-h-[400px] text-white rounded-2xl overflow-hidden shadow-lg">
+            <Swiper
+                modules={[Navigation, SwiperPagination, Autoplay, EffectFade]}
+                className="h-full"
+                spaceBetween={0}
+                slidesPerView={1}
+                navigation
+                pagination={{ clickable: true }}
+                loop={true}
+                autoplay={{ delay: 5000, disableOnInteraction: false }}
+                effect="fade"
+                fadeEffect={{ crossFade: true }}
+            >
+                {[
+                    { img: "https://picsum.photos/seed/hero1/1920/1080", title: "Pemantauan Real-Time", sub: "Data tanah longsor terkini dari sumber terpercaya di seluruh Indonesia." },
+                    { img: "https://picsum.photos/seed/hero2/1920/1080", title: "Edukasi & Mitigasi", sub: "Pahami penyebab, jenis, dan cara pencegahan tanah longsor." },
+                    { img: "https://picsum.photos/seed/hero3/1920/1080", title: "Statistik & Analisis", sub: "Visualisasi data kejadian, korban, dan wilayah terdampak." },
+                ].map((slide, index) => (
+                    <SwiperSlide key={index}>
+                        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.img})` }}></div>
+                        <div className="absolute inset-0 bg-black/50"></div>
+                        <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
+                            <h1 className="text-4xl md:text-5xl font-poppins font-bold tracking-tight mb-4 animate-fade-in-down">{slide.title}</h1>
+                            <p className="text-lg md:text-xl max-w-3xl text-gray-200 mb-8 animate-fade-in-up">{slide.sub}</p>
+                            <Link to="/peta" className="bg-accent-blue text-white font-poppins font-medium uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-accent-blue-hover transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_theme(colors.accent-blue)]">
+                                Pelajari Lebih Lanjut
+                            </Link>
+                        </div>
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+        </div>
+    );
+};
+
+const NewsCard: React.FC<{ article: NewsArticle; onReadMore: (id: number) => void }> = ({ article, onReadMore }) => (
+    <div className="bg-secondary-light rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-2 transition-transform duration-300 flex flex-col group">
+        <div className="overflow-hidden">
+            <img className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300" src={article.image} alt={article.title} />
+        </div>
+        <div className="p-6 flex flex-col flex-grow">
+            <p className="text-sm text-accent-blue font-semibold">{article.date}</p>
+            <h3 className="mt-2 text-lg font-poppins font-semibold text-text-dark flex-grow">{article.title}</h3>
+            <p className="mt-2 text-sm text-text-muted">{article.summary}</p>
+            <button onClick={() => onReadMore(article.id)} className="mt-4 text-sm font-poppins font-medium text-accent-blue hover:underline hover:text-accent-blue-hover transition-colors duration-200 text-left">Baca Selengkapnya</button>
+        </div>
+    </div>
+);
+
+const WarningBanner: React.FC = () => {
+    const [isVisible, setIsVisible] = useState(true);
+    if (!isVisible) return null;
+
+    return (
+        <div className="bg-orange-warning/10 border-l-4 border-orange-warning text-orange-700 p-4 rounded-r-lg mb-8" role="alert">
+            <div className="flex">
+                <div className="py-1"><svg className="fill-current h-6 w-6 text-orange-warning mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 5v6h2V5H9zm0 8h2v2H9v-2z"/></svg></div>
+                <div>
+                    <p className="font-bold font-poppins">Peringatan Dini Cuaca Ekstrem</p>
+                    <p className="text-sm">Waspada potensi hujan lebat yang dapat disertai kilat/petir dan angin kencang di sebagian besar wilayah Indonesia. Tingkatkan kesiapsiagaan terhadap potensi bencana hidrometeorologi seperti banjir dan tanah longsor.</p>
+                </div>
+                <button onClick={() => setIsVisible(false)} className="ml-auto flex-shrink-0 p-1"><XIcon /></button>
+            </div>
+        </div>
+    )
+}
+
+const NewsDetailModal: React.FC<{ article: NewsArticle; onClose: () => void }> = ({ article, onClose }) => {
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
+            <div className="bg-secondary-light rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10 bg-white/50 backdrop-blur-sm rounded-full p-2">
+                    <XIcon />
+                </button>
+                <img className="w-full h-64 object-cover rounded-t-2xl" src={article.image} alt={article.title} />
+                <div className="p-8">
+                    <p className="text-sm text-accent-blue font-semibold uppercase">{article.category}</p>
+                    <h2 className="text-3xl font-poppins font-bold text-text-dark mt-2">{article.title}</h2>
+                    <p className="text-sm text-text-muted mt-2">{article.date}</p>
+                    <div className="prose max-w-none mt-6 text-text-muted">
+                        <p>{article.content}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const Pagination: React.FC<{ currentPage: number, totalPages: number, onPageChange: (page: number) => void }> = ({ currentPage, totalPages, onPageChange }) => (
+    <div className="flex justify-center items-center space-x-2 mt-8">
+        <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="p-2 rounded-md bg-white border border-gray-300 disabled:opacity-50 hover:bg-gray-100 transition-colors"><ChevronLeftIcon /></button>
+        <span className="text-sm font-medium text-text-muted">Halaman {currentPage} dari {totalPages}</span>
+        <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="p-2 rounded-md bg-white border border-gray-300 disabled:opacity-50 hover:bg-gray-100 transition-colors"><ChevronRightIcon /></button>
+    </div>
+);
+
+
+const HomePage: React.FC = () => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedNews, setSelectedNews] = useState<NewsArticle | null>(null);
+    const [landslideData, setLandslideData] = useState<LandslideFeatureCollection | null>(null);
+    const [isLoadingMap, setIsLoadingMap] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoadingMap(true);
+            try {
+                const data = await getOfficialLandslideData();
+                setLandslideData(data);
+            } catch (error) {
+                console.error("Failed to fetch landslide data:", error);
+            } finally {
+                setIsLoadingMap(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const articlesPerPage = 3;
+    const totalPages = Math.ceil(newsData.length / articlesPerPage);
+    const currentArticles = newsData.slice((currentPage - 1) * articlesPerPage, currentPage * articlesPerPage);
+
+    const handleReadMore = (id: number) => {
+        const article = newsData.find(a => a.id === id);
+        if (article) {
+            setSelectedNews(article);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setSelectedNews(null);
+    };
+
+    return (
+        <div className="bg-primary-light">
+             {selectedNews && <NewsDetailModal article={selectedNews} onClose={handleCloseModal} />}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <WarningBanner />
+                <HeroCarousel />
+            </div>
+
+            <Section title="Berita Terbaru" className="bg-gray-soft">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {currentArticles.map(article => <NewsCard key={article.id} article={article} onReadMore={handleReadMore} />)}
+                </div>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                <div className="text-center mt-8">
+                    <Link 
+                        to="/pengetahuan#berita" 
+                        className="inline-block bg-accent-blue text-white font-poppins font-medium px-8 py-3 rounded-lg hover:bg-accent-blue-hover transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-blue/40"
+                    >
+                        Lihat Semua Berita
+                    </Link>
+                </div>
+            </Section>
+            
+            <Section title="Peta Sebaran Longsor" subtitle="Pantau lokasi kejadian tanah longsor aktif di seluruh Indonesia berdasarkan data terbaru dari BNPB.">
+                <div className="h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative">
+                    {isLoadingMap ? (
+                        <div className="flex items-center justify-center h-full bg-gray-soft">
+                            <p className="text-text-muted">Memuat Peta...</p>
+                        </div>
+                    ) : (
+                        <MapContainer center={[-2.548926, 118.0148634]} zoom={5} scrollWheelZoom={false} style={{ height: '100%', width: '100%', backgroundColor: '#F8F9FA' }}>
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                            />
+                            {landslideData?.features.map(point => (
+                                <Marker key={point.properties.id} position={[point.geometry.coordinates[1], point.geometry.coordinates[0]]} icon={orangeIcon}>
+                                    <Popup>
+                                        <div className="font-poppins">
+                                            <h4 className="font-bold text-base mb-1">{point.properties.lokasi}</h4>
+                                            <p className="text-xs">Tanggal: {point.properties.tanggal}</p>
+                                            <p className="text-xs">Korban Jiwa: {point.properties.korban_meninggal}</p>
+                                            <p className="text-xs font-semibold mt-1">Sumber: {point.properties.sumber}</p>
+                                        </div>
+                                    </Popup>
+                                </Marker>
+                            ))}
+                        </MapContainer>
+                    )}
+                </div>
+            </Section>
+            
+            <Section title="Statistik Kejadian 2 Tahun Terakhir" className="bg-gray-soft">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div className="bg-secondary-light p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-warning/20">
+                        <h3 className="text-5xl font-poppins font-bold text-orange-warning">
+                            <CountUp end={1253} duration={3} enableScrollSpy />
+                        </h3>
+                        <p className="mt-2 text-lg text-text-muted">Total Kejadian</p>
+                    </div>
+                     <div className="bg-secondary-light p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-warning/20">
+                        <h3 className="text-5xl font-poppins font-bold text-orange-warning">
+                             <CountUp end={432} duration={3} enableScrollSpy />
+                        </h3>
+                        <p className="mt-2 text-lg text-text-muted">Korban Jiwa</p>
+                    </div>
+                     <div className="bg-secondary-light p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-warning/20">
+                        <h3 className="text-5xl font-poppins font-bold text-orange-warning">
+                             <CountUp end={34} duration={3} enableScrollSpy />
+                        </h3>
+                        <p className="mt-2 text-lg text-text-muted">Provinsi Terdampak</p>
+                    </div>
+                </div>
+            </Section>
+
+            <Section title="Pengetahuan Mitigasi Bencana" subtitle="Tingkatkan pemahaman Anda untuk mengurangi risiko dan dampak dari bencana tanah longsor.">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                     {[
+                         { title: "Apa itu Tanah Longsor?", link: "/pengetahuan#longsor" },
+                         { title: "Penyebab & Pemicu", link: "/pengetahuan#longsor" },
+                         { title: "Pencegahan & Mitigasi", link: "/pengetahuan#longsor" },
+                         { title: "Jenis-jenis Longsor", link: "/pengetahuan#longsor" },
+                     ].map(item => (
+                         <Link key={item.title} to={item.link} className="block p-8 bg-secondary-light rounded-2xl shadow-lg border border-gray-200 text-center transform hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-accent-blue/20">
+                             <h3 className="font-poppins font-semibold text-lg text-text-dark">{item.title}</h3>
+                         </Link>
+                     ))}
+                 </div>
+            </Section>
+        </div>
+    );
+};
+
+export default HomePage;
