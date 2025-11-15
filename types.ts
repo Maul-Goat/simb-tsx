@@ -51,6 +51,7 @@ export interface UserReport {
 }
 
 export interface DetailedLandslideEvent {
+  id: number;
   no: number;
   idKabupaten: string;
   tanggalKejadian: string;

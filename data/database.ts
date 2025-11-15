@@ -88,6 +88,7 @@ export const getDetailedLandslideData = async (): Promise<DetailedLandslideEvent
         throw error;
     }
     return data.map((item: any, index: number) => ({
+        id: item.id,
         no: index + 1,
         idKabupaten: item.id_kabupaten || 'N/A',
         tanggalKejadian: new Date(item.tanggal).toISOString(),
@@ -142,6 +143,39 @@ export const getKnowledgeData = async (): Promise<KnowledgeArticle[]> => {
 };
 
 // --- DATA MUTATIONS ---
+
+export const addBerita = async (berita: { judul: string; isi: string; gambar: string; tanggal: string; }): Promise<any> => {
+    const client = getSupabaseClient();
+    if (!client) throw new Error("Supabase not configured");
+
+    const { data, error } = await client.from('berita').insert({
+        judul: berita.judul,
+        isi: berita.isi,
+        gambar: berita.gambar,
+        tanggal: berita.tanggal
+    });
+    if (error) {
+        console.error('Error adding news:', error);
+        throw error;
+    }
+    return data;
+};
+
+export const addMateri = async (materi: { kategori: string; judul: string; isi: string; }): Promise<any> => {
+    const client = getSupabaseClient();
+    if (!client) throw new Error("Supabase not configured");
+
+    const { data, error } = await client.from('materi').insert({
+        kategori: materi.kategori,
+        judul: materi.judul,
+        isi: materi.isi
+    });
+    if (error) {
+        console.error('Error adding knowledge article:', error);
+        throw error;
+    }
+    return data;
+};
 
 export const addUserReport = async (report: Omit<UserReport, 'id' | 'status' | 'photo'>): Promise<any> => {
     const client = getSupabaseClient();
@@ -241,6 +275,40 @@ export const rejectUserReport = async (reportId: number): Promise<boolean> => {
     const { error } = await client.from('laporan').update({ status: 'selesai' }).eq('id_laporan', reportId);
     if (error) {
         console.error('Error rejecting report:', error);
+        return false;
+    }
+    return true;
+};
+
+// --- DATA DELETIONS ---
+export const deleteBerita = async (id: number): Promise<boolean> => {
+    const client = getSupabaseClient();
+    if (!client) return false;
+    const { error } = await client.from('berita').delete().eq('id_berita', id);
+    if (error) {
+        console.error('Error deleting news:', error);
+        return false;
+    }
+    return true;
+};
+
+export const deleteKejadian = async (id: number): Promise<boolean> => {
+    const client = getSupabaseClient();
+    if (!client) return false;
+    const { error } = await client.from('kejadian_longsor').delete().eq('id', id);
+     if (error) {
+        console.error('Error deleting landslide event:', error);
+        return false;
+    }
+    return true;
+};
+
+export const deleteMateri = async (id: number): Promise<boolean> => {
+    const client = getSupabaseClient();
+    if (!client) return false;
+    const { error } = await client.from('materi').delete().eq('id_materi', id);
+     if (error) {
+        console.error('Error deleting knowledge article:', error);
         return false;
     }
     return true;

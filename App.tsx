@@ -6,6 +6,7 @@ import StatsPage from './pages/StatsPage';
 import KnowledgeBasePage from './pages/KnowledgeBasePage';
 import AboutPage from './pages/AboutPage';
 import AdminPage from './pages/AdminPage';
+import DatabasePage from './pages/DatabasePage';
 import { NAV_LINKS } from './constants';
 import { MenuIcon, XIcon, LogoIcon, ChevronDownIcon } from './constants';
 
@@ -276,6 +277,7 @@ const App: React.FC = () => {
                         <Route path="/pengetahuan" element={<KnowledgeBasePage />} />
                         <Route path="/tentang" element={<AboutPage />} />
                         <Route path="/admin" element={<AdminPage />} />
+                        <Route path="/database" element={<DatabasePage />} />
                         {/* A detail page would be better, but we cannot create new files.
                         <Route path="/berita/:id" element={<NewsDetailPage />} /> 
                         */}
