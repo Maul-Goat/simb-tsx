@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { getOfficialLandslideData, getPendingUserReports, addUserReport } from '../data/database';
@@ -56,6 +56,26 @@ const MapInteractionController: React.FC<{
     return null;
 };
 
+// New component to track map bounds for performance optimization
+const MapBoundsUpdater: React.FC<{ setBounds: (bounds: L.LatLngBounds) => void }> = ({ setBounds }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (map) {
+            setBounds(map.getBounds());
+        }
+    }, [map, setBounds]);
+
+    useMapEvents({
+        moveend() {
+            setBounds(map.getBounds());
+        },
+        zoomend() {
+             setBounds(map.getBounds());
+        }
+    });
+    return null;
+};
+
 const MapPage: React.FC = () => {
     const [officialData, setOfficialData] = useState<LandslideFeatureCollection | null>(null);
     const [pendingReports, setPendingReports] = useState<UserReport[]>([]);
@@ -72,6 +92,7 @@ const MapPage: React.FC = () => {
     const formRef = useRef<HTMLDivElement>(null);
     const markerRefs = useRef<Record<number, L.Marker | null>>({});
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+    const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
 
 
     const fetchData = async () => {
@@ -81,6 +102,8 @@ const MapPage: React.FC = () => {
                 getOfficialLandslideData(),
                 getPendingUserReports()
             ]);
+            // Ensure client-side sorting for robustness, newest first
+            official.features.sort((a, b) => new Date(b.properties.tanggal).getTime() - new Date(a.properties.tanggal).getTime());
             setOfficialData(official);
             setPendingReports(pending);
         } catch (error) {
@@ -127,6 +150,14 @@ const MapPage: React.FC = () => {
             }
         }
     };
+    
+    const visibleOfficialMarkers = useMemo(() => {
+        if (!officialData || !bounds) return [];
+        return officialData.features.filter(point => {
+            const latLng = L.latLng(point.geometry.coordinates[1], point.geometry.coordinates[0]);
+            return bounds.contains(latLng);
+        });
+    }, [officialData, bounds]);
 
     return (
         <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
@@ -145,9 +176,10 @@ const MapPage: React.FC = () => {
                     
                     <MapEvents onMapClick={handleMapClick} />
                     <MapInteractionController selectedEventId={selectedEventId} data={officialData} markerRefs={markerRefs} />
+                    <MapBoundsUpdater setBounds={setBounds} />
 
-                    {/* Official Data Markers */}
-                    {officialData?.features.map(point => (
+                    {/* Official Data Markers - Render only visible ones for performance */}
+                    {visibleOfficialMarkers.map(point => (
                         <Marker 
                             key={`official-${point.properties.id}`} 
                             position={[point.geometry.coordinates[1], point.geometry.coordinates[0]]} 
