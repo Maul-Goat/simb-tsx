@@ -52,7 +52,7 @@ export const XIcon: React.FC = () => (
 
 export const LogoIcon: React.FC = () => (
     React.createElement('svg', {
-        className: "h-8 w-8 text-accent-blue",
+        className: "h-8 w-8 text-brand-primary",
         fill: "currentColor",
         viewBox: "0 0 20 20"
     },

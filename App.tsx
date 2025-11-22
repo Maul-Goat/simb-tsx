@@ -40,29 +40,29 @@ const Navbar: React.FC = () => {
     }
 
     return (
-        <header className="bg-primary-light/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <header className="bg-background-primary/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
                     <NavLink to="/" className="flex-shrink-0 flex items-center gap-2 group">
                         <LogoIcon />
-                        <span className="text-2xl font-poppins font-bold text-text-dark group-hover:text-accent-blue transition-colors duration-200">SIGLON</span>
+                        <span className="text-2xl font-poppins font-bold text-text-main group-hover:text-brand-primary transition-colors duration-200">SIGLON</span>
                     </NavLink>
                     <div className="hidden md:block">
                         <nav className="ml-10 flex items-baseline space-x-1">
                             {NAV_LINKS.map((link) =>
                                 link.subLinks ? (
                                     <div key={link.name} className="relative" onMouseEnter={() => handleMouseEnter(link.name)} onMouseLeave={handleMouseLeave}>
-                                        <button className={`px-3 py-2 rounded-md text-sm font-poppins font-medium flex items-center gap-1 transition-all duration-300 ${location.pathname.startsWith(link.path) ? 'bg-accent-blue text-white shadow-[0_0_10px_theme(colors.accent-blue)]' : 'text-text-muted hover:bg-gray-200 hover:text-text-dark'}`}>
+                                        <button className={`px-3 py-2 rounded-md text-sm font-poppins font-medium flex items-center gap-1 transition-all duration-300 ${location.pathname.startsWith(link.path) ? 'bg-brand-primary text-white shadow-[0_0_10px_theme(colors.brand-primary)]' : 'text-text-subtle hover:bg-background-tertiary hover:text-text-main'}`}>
                                             {link.name}
                                             <ChevronDownIcon />
                                         </button>
                                         {openDropdown === link.name && (
-                                            <div className="absolute top-full mt-2 w-56 rounded-xl shadow-lg bg-secondary-light ring-1 ring-black ring-opacity-5 py-2 z-10 animate-fade-in-down origin-top-right">
+                                            <div className="absolute top-full mt-2 w-56 rounded-xl shadow-lg bg-background-secondary ring-1 ring-black ring-opacity-5 py-2 z-10 animate-fade-in-down origin-top-right">
                                                 {link.subLinks.map(subLink => (
                                                     <NavLink
                                                         key={subLink.name}
                                                         to={subLink.path}
-                                                        className={({ isActive }) => `block px-4 py-2 text-sm font-poppins ${isActive ? 'text-accent-blue' : 'text-text-muted'} hover:bg-gray-100 hover:text-text-dark`}
+                                                        className={({ isActive }) => `block px-4 py-2 text-sm font-poppins ${isActive ? 'text-brand-primary' : 'text-text-subtle'} hover:bg-background-tertiary hover:text-text-main`}
                                                     >
                                                         {subLink.name}
                                                     </NavLink>
@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
                                         key={link.name}
                                         to={link.path}
                                         className={({ isActive }) =>
-                                            `px-3 py-2 rounded-md text-sm font-poppins font-medium transition-all duration-300 ${isActive ? 'bg-accent-blue text-white shadow-[0_0_10px_theme(colors.accent-blue)]' : 'text-text-muted hover:bg-gray-200 hover:text-text-dark'}`
+                                            `px-3 py-2 rounded-md text-sm font-poppins font-medium transition-all duration-300 ${isActive ? 'bg-brand-primary text-white shadow-[0_0_10px_theme(colors.brand-primary)]' : 'text-text-subtle hover:bg-background-tertiary hover:text-text-main'}`
                                         }
                                     >
                                         {link.name}
@@ -88,7 +88,7 @@ const Navbar: React.FC = () => {
                         <button
                             onClick={() => setIsOpen(!isOpen)}
                             type="button"
-                            className="bg-gray-200 inline-flex items-center justify-center p-2 rounded-md text-text-dark hover:bg-accent-blue hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-primary-light focus:ring-accent-blue"
+                            className="bg-background-tertiary inline-flex items-center justify-center p-2 rounded-md text-text-main hover:bg-brand-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-background-primary focus:ring-brand-primary"
                             aria-controls="mobile-menu"
                             aria-expanded="false"
                         >
@@ -105,7 +105,7 @@ const Navbar: React.FC = () => {
                         {NAV_LINKS.map((link) =>
                             link.subLinks ? (
                                 <div key={link.name}>
-                                    <button onClick={() => toggleMobileSubmenu(link.name)} className={`w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${location.pathname.startsWith(link.path) ? 'bg-accent-blue text-white' : 'text-text-muted hover:bg-gray-200 hover:text-text-dark'}`}>
+                                    <button onClick={() => toggleMobileSubmenu(link.name)} className={`w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${location.pathname.startsWith(link.path) ? 'bg-brand-primary text-white' : 'text-text-subtle hover:bg-background-tertiary hover:text-text-main'}`}>
                                        <span>{link.name}</span>
                                        <ChevronDownIcon className={`transition-transform duration-200 ${mobileSubmenuOpen === link.name ? 'rotate-180' : ''}`} />
                                     </button>
@@ -115,7 +115,7 @@ const Navbar: React.FC = () => {
                                                  <NavLink
                                                     key={subLink.name}
                                                     to={subLink.path}
-                                                    className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${isActive ? 'bg-accent-blue/80 text-white' : 'text-text-muted hover:bg-gray-200 hover:text-text-dark'}`}
+                                                    className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${isActive ? 'bg-brand-primary/80 text-white' : 'text-text-subtle hover:bg-background-tertiary hover:text-text-main'}`}
                                                  >
                                                     {subLink.name}
                                                  </NavLink>
@@ -128,7 +128,7 @@ const Navbar: React.FC = () => {
                                     key={link.name}
                                     to={link.path}
                                     className={({ isActive }) =>
-                                        `block px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${isActive ? 'bg-accent-blue text-white' : 'text-text-muted hover:bg-gray-200 hover:text-text-dark'}`
+                                        `block px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${isActive ? 'bg-brand-primary text-white' : 'text-text-subtle hover:bg-background-tertiary hover:text-text-main'}`
                                     }
                                 >
                                     {link.name}
@@ -145,22 +145,22 @@ const Navbar: React.FC = () => {
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-gray-soft border-t border-gray-200">
+        <footer className="bg-background-tertiary border-t border-gray-200">
             <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
                             <LogoIcon />
-                            <h3 className="text-xl font-poppins font-bold text-text-dark">SIGLON</h3>
+                            <h3 className="text-xl font-poppins font-bold text-text-main">SIGLON</h3>
                         </div>
-                        <p className="text-sm text-text-muted max-w-xs">Mengenal, Mencegah, dan Memantau Tanah Longsor di Indonesia.</p>
+                        <p className="text-sm text-text-subtle max-w-xs">Mengenal, Mencegah, dan Memantau Tanah Longsor di Indonesia.</p>
                     </div>
                     <div>
-                        <h3 className="text-sm font-poppins font-semibold text-text-dark uppercase tracking-wider">Navigasi</h3>
+                        <h3 className="text-sm font-poppins font-semibold text-text-main uppercase tracking-wider">Navigasi</h3>
                         <ul className="mt-4 space-y-2">
                             {NAV_LINKS.map((link) => (
                                 <li key={`footer-${link.name}`}>
-                                    <NavLink to={link.path} className="text-base text-text-muted hover:text-accent-blue transition-colors duration-200">
+                                    <NavLink to={link.path} className="text-base text-text-subtle hover:text-brand-primary transition-colors duration-200">
                                         {link.name}
                                     </NavLink>
                                 </li>
@@ -168,8 +168,8 @@ const Footer: React.FC = () => {
                         </ul>
                     </div>
                     <div>
-                         <h3 className="text-sm font-poppins font-semibold text-text-dark uppercase tracking-wider">Sumber Data</h3>
-                         <p className="mt-4 text-base text-text-muted">Data kejadian bencana bersumber dari Data Informasi Bencana Indonesia (DIBI) yang dikelola oleh Badan Nasional Penanggulangan Bencana (BNPB).</p>
+                         <h3 className="text-sm font-poppins font-semibold text-text-main uppercase tracking-wider">Sumber Data</h3>
+                         <p className="mt-4 text-base text-text-subtle">Data kejadian bencana bersumber dari Data Informasi Bencana Indonesia (DIBI) yang dikelola oleh Badan Nasional Penanggulangan Bencana (BNPB).</p>
                     </div>
                 </div>
                 <div className="mt-8 border-t border-gray-300 pt-8 text-center text-sm text-gray-500">

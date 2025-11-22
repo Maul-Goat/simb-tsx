@@ -4,10 +4,10 @@ import { getDetailedLandslideData } from '../data/database';
 import { DetailedLandslideEvent, ProvinceStat } from '../types';
 
 const PageHeader: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
-    <div className="bg-secondary-light py-12 border-b border-gray-200">
+    <div className="bg-background-secondary py-12 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl font-poppins font-bold text-text-dark">{title}</h1>
-            <p className="mt-2 text-lg text-text-muted">{subtitle}</p>
+            <h1 className="text-4xl font-poppins font-bold text-text-main">{title}</h1>
+            <p className="mt-2 text-lg text-text-subtle">{subtitle}</p>
         </div>
     </div>
 );
@@ -17,7 +17,7 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
     const data = payload[0].payload;
     return (
       <div className="bg-white/80 backdrop-blur-sm p-3 border border-gray-300 rounded-lg text-sm shadow-md">
-        <p className="label font-semibold text-text-dark">{label || data.name}</p>
+        <p className="label font-semibold text-text-main">{label || data.name}</p>
         <p className="intro" style={{ color: payload[0].color || payload[0].payload.fill }}>{`Jumlah: ${payload[0].value}`}</p>
       </div>
     );
@@ -35,7 +35,7 @@ const SortableTableHeader: React.FC<{
     const isSorted = sortConfig?.key === column;
     const directionIcon = isSorted ? (sortConfig?.direction === 'ascending' ? '▲' : '▼') : '';
     return (
-        <th scope="col" className="px-6 py-3 text-left text-xs font-poppins font-bold text-text-dark uppercase tracking-wider cursor-pointer" onClick={() => requestSort(column)}>
+        <th scope="col" className="px-6 py-3 text-left text-xs font-poppins font-bold text-text-main uppercase tracking-wider cursor-pointer" onClick={() => requestSort(column)}>
             {label} {directionIcon}
         </th>
     );
@@ -43,7 +43,7 @@ const SortableTableHeader: React.FC<{
 
 
 const StatsPage: React.FC = () => {
-    const COLORS = ['#007BFF', '#FD7E14', '#28A745', '#6C757D', '#17A2B8', '#6610F2'];
+    const COLORS = ['#4A6C6F', '#E9A229', '#5CB85C', '#6E5E54', '#D9534F', '#3D2C21'];
     
     const [detailedData, setDetailedData] = useState<DetailedLandslideEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -126,21 +126,21 @@ const StatsPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-primary-light min-h-screen">
+        <div className="bg-background-primary min-h-screen">
             <PageHeader title="Statistik & Data Bencana" subtitle="Analisis dan rincian data kejadian tanah longsor di Indonesia." />
             
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
                  {isLoading ? (
-                    <div className="text-center p-10 bg-secondary-light rounded-2xl shadow-lg border">
-                        <p className="text-text-muted">Memuat data statistik...</p>
+                    <div className="text-center p-10 bg-background-secondary rounded-2xl shadow-lg border">
+                        <p className="text-text-subtle">Memuat data statistik...</p>
                     </div>
                  ) : (
                     <>
-                    <section className="bg-secondary-light p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-dark">Tabel Rincian Kejadian Bencana</h2>
+                    <section className="bg-background-secondary p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+                        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-main">Tabel Rincian Kejadian Bencana</h2>
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-soft">
+                                <thead className="bg-background-tertiary">
                                     <tr>
                                         <SortableTableHeader column="no" label="No." sortConfig={sortConfig} requestSort={requestSort} />
                                         <SortableTableHeader column="tanggalKejadian" label="Tanggal" sortConfig={sortConfig} requestSort={requestSort} />
@@ -153,11 +153,11 @@ const StatsPage: React.FC = () => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {sortedData.map((item) => (
-                                        <tr key={item.no} className="hover:bg-primary-light">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">{item.no}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-dark">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-dark">{item.lokasi}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-dark">{item.provinsi}</td>
+                                        <tr key={item.no} className="hover:bg-background-tertiary">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-subtle">{item.no}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{item.lokasi}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{item.provinsi}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.meninggal}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.terluka}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.rumahRusak}</td>
@@ -168,38 +168,38 @@ const StatsPage: React.FC = () => {
                         </div>
                     </section>
 
-                    <section className="bg-secondary-light p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-dark">Grafik Jumlah Kejadian per Bulan</h2>
+                    <section className="bg-background-secondary p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+                        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-main">Grafik Jumlah Kejadian per Bulan</h2>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div>
-                                <h3 className="text-lg font-poppins font-medium text-text-dark text-center mb-4">Tahun 2023</h3>
+                                <h3 className="text-lg font-poppins font-medium text-text-main text-center mb-4">Tahun 2023</h3>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={monthlyStats2023} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
-                                        <XAxis dataKey="name" stroke="#6c757d" />
-                                        <YAxis stroke="#6c757d" />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#007bff10' }} />
-                                        <Bar dataKey="kejadian" fill="#697565" />
+                                        <XAxis dataKey="name" stroke="#6E5E54" />
+                                        <YAxis stroke="#6E5E54" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#4A6C6F10' }} />
+                                        <Bar dataKey="kejadian" fill="#4A6C6F" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
                             <div>
-                                <h3 className="text-lg font-poppins font-medium text-text-dark text-center mb-4">Tahun 2024 (YTD)</h3>
+                                <h3 className="text-lg font-poppins font-medium text-text-main text-center mb-4">Tahun 2024 (YTD)</h3>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={monthlyStats2024} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#dee2e6" />
-                                        <XAxis dataKey="name" stroke="#6c757d" />
-                                        <YAxis stroke="#6c757d" />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#fd7e1410' }}/>
-                                        <Bar dataKey="kejadian" fill="#D97A36" />
+                                        <XAxis dataKey="name" stroke="#6E5E54" />
+                                        <YAxis stroke="#6E5E54" />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#E9A22910' }}/>
+                                        <Bar dataKey="kejadian" fill="#E9A229" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
                     </section>
 
-                    <section className="bg-secondary-light p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                        <h2 className="text-2xl font-poppins font-semibold text-text-dark text-center mb-6">Distribusi Kejadian per Provinsi</h2>
+                    <section className="bg-background-secondary p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+                        <h2 className="text-2xl font-poppins font-semibold text-text-main text-center mb-6">Distribusi Kejadian per Provinsi</h2>
                         <ResponsiveContainer width="100%" height={400}>
                             <PieChart>
                                 <Pie
@@ -218,7 +218,7 @@ const StatsPage: React.FC = () => {
                                     ))}
                                 </Pie>
                                 <Tooltip content={<CustomTooltip />} />
-                                <Legend wrapperStyle={{ color: '#212529' }}/>
+                                <Legend wrapperStyle={{ color: '#3D2C21' }}/>
                             </PieChart>
                         </ResponsiveContainer>
                     </section>

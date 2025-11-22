@@ -2,7 +2,7 @@
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23007BFF' d='M10 90 L50 10 L90 90 Z'/%3E%3C/svg%3E" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%234A6C6F' d='M10 90 L50 10 L90 90 Z'/%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SIGLON - Sistem Informasi Tanah Longsor</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,24 +12,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
-      /* Custom scrollbar for a modern bright theme */
+      /* Custom scrollbar for earthy theme */
       ::-webkit-scrollbar {
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #e9ecef;
+        background: #F5F2EC; /* background-tertiary */
       }
       ::-webkit-scrollbar-thumb {
-        background: #adb5bd;
+        background: #A89990; /* A muted brown */
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #6c757d;
+        background: #6E5E54; /* text-subtle */
       }
       /* Leaflet popup customization for light theme */
       .leaflet-popup-content-wrapper {
         background-color: #ffffff;
-        color: #212529;
+        color: #3D2C21; /* text-main */
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       }
@@ -40,15 +40,15 @@
         background-color: #ffffff;
       }
       .leaflet-container a.leaflet-popup-close-button {
-        color: #212529;
+        color: #3D2C21; /* text-main */
       }
        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
         background-color: #ffffff !important;
-        color: #212529 !important;
+        color: #3D2C21 !important; /* text-main */
         border-color: #dee2e6 !important;
       }
        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
-        background-color: #f8f9fa !important;
+        background-color: #F5F2EC !important; /* background-tertiary */
       }
     </style>
     <script>
@@ -56,15 +56,16 @@
         theme: {
           extend: {
             colors: {
-              'primary-light': '#F8F9FA', // Very light gray, almost white
-              'secondary-light': '#FFFFFF', // Pure white for cards
-              'gray-soft': '#E9ECEF', // A soft gray for alternating sections
-              'text-dark': '#212529', // Dark charcoal for text
-              'text-muted': '#6C757D', // Lighter gray for subtitles
-              'accent-blue': '#007BFF', // Vibrant blue for primary actions
-              'accent-blue-hover': '#0056B3', // Darker blue for hover
-              'orange-warning': '#FD7E14', // A bright, attention-grabbing orange
-              'green-info': '#28A745', // A clear green for success/info states
+              'background-primary': '#FDFBF7', // warm off-white
+              'background-secondary': '#FFFFFF', // pure white
+              'background-tertiary': '#F5F2EC', // light beige
+              'text-main': '#3D2C21', // dark brown
+              'text-subtle': '#6E5E54', // muted brown
+              'brand-primary': '#4A6C6F', // slate teal
+              'brand-primary-hover': '#3A5658', // darker slate teal
+              'status-warning': '#D9534F', // impactful red
+              'status-info': '#5CB85C', // natural green
+              'status-highlight': '#E9A229', // ochre/gold
             },
             fontFamily: {
               'poppins': ['Poppins', 'sans-serif'],
@@ -93,7 +94,7 @@
 }
 </script>
 </head>
-<body class="bg-primary-light text-text-dark font-lato">
+<body class="bg-background-primary text-text-main font-lato">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

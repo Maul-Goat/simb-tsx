@@ -3,22 +3,22 @@ import { LogoIcon } from '../constants';
 
 const AboutPage: React.FC = () => {
     return (
-        <div className="bg-primary-light min-h-screen">
-            <div className="bg-secondary-light border-b border-gray-200">
+        <div className="bg-background-primary min-h-screen">
+            <div className="bg-background-secondary border-b border-gray-200">
                 <div className="max-w-6xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
                     <div className="flex justify-center items-center gap-4 mb-4">
                         <LogoIcon />
-                        <h1 className="text-4xl font-poppins font-bold tracking-tight text-text-dark sm:text-5xl lg:text-6xl">Tentang SIGLON</h1>
+                        <h1 className="text-4xl font-poppins font-bold tracking-tight text-text-main sm:text-5xl lg:text-6xl">Tentang SIGLON</h1>
                     </div>
-                    <p className="mt-4 max-w-3xl mx-auto text-xl text-text-muted">
+                    <p className="mt-4 max-w-3xl mx-auto text-xl text-text-subtle">
                         Mengenal, Mencegah, dan Memantau Tanah Longsor di Indonesia.
                     </p>
                 </div>
             </div>
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="prose prose-lg max-w-none text-text-muted prose-headings:text-text-dark prose-headings:font-poppins">
-                    <p className="lead text-text-dark">
+                <div className="prose prose-lg max-w-none text-text-subtle prose-headings:text-text-main prose-headings:font-poppins">
+                    <p className="lead text-text-main">
                         SIGLON (Sistem Informasi Geospasial Tanah Longsor Nasional) adalah sebuah inisiatif berbasis web yang didedikasikan untuk menjadi pusat informasi, pemantauan, dan edukasi mengenai bencana tanah longsor di Indonesia.
                     </p>
 
@@ -51,9 +51,9 @@ const AboutPage: React.FC = () => {
                         Aplikasi ini dikembangkan sebagai bagian dari studi kasus untuk menunjukkan bagaimana teknologi dapat dimanfaatkan dalam mitigasi bencana.
                     </p>
 
-                    <div className="mt-12 p-6 bg-blue-50 rounded-2xl border border-accent-blue/30">
-                        <h3 className="font-poppins font-semibold text-text-dark">Sumber Data</h3>
-                        <p className="mt-2 text-sm text-text-muted">
+                    <div className="mt-12 p-6 bg-brand-primary/10 rounded-2xl border border-brand-primary/30">
+                        <h3 className="font-poppins font-semibold text-text-main">Sumber Data</h3>
+                        <p className="mt-2 text-sm text-text-subtle">
                             Seluruh data kejadian bencana yang ditampilkan di platform ini bersumber dari Data Informasi Bencana Indonesia (DIBI) yang dikelola secara resmi oleh Badan Nasional Penanggulangan Bencana (BNPB). Kami berkomitmen untuk menyajikan data yang valid dan dapat dipertanggungjawabkan.
                         </p>
                     </div>

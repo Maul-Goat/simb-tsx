@@ -22,8 +22,8 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
         onClick={onClick}
         className={`px-4 py-2 text-sm font-poppins font-medium rounded-md transition-colors duration-200 focus:outline-none ${
             active
-                ? 'bg-accent-blue text-white shadow-md'
-                : 'bg-gray-200 text-text-muted hover:bg-gray-300 hover:text-text-dark'
+                ? 'bg-brand-primary text-white shadow-md'
+                : 'bg-gray-200 text-text-subtle hover:bg-gray-300 hover:text-text-main'
         }`}
     >
         {children}
@@ -31,8 +31,8 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
 );
 
 const Section: React.FC<{ title: string; children: React.ReactNode; className?: string; }> = ({ title, children, className }) => (
-    <section className={`bg-secondary-light p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 ${className}`}>
-        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-dark">{title}</h2>
+    <section className={`bg-background-secondary p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 ${className}`}>
+        <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-main">{title}</h2>
         {children}
     </section>
 );
@@ -104,22 +104,22 @@ const LaporanManager: React.FC = () => {
     return (
         <Section title="Laporan Masyarakat (Pending)">
             {isLoading ? (
-                 <p className="text-text-muted">Memuat laporan...</p>
+                 <p className="text-text-subtle">Memuat laporan...</p>
             ) : pendingReports.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {pendingReports.map(report => {
                         const isProcessing = processingReportId === report.id;
                         return (
-                        <div key={report.id} className="bg-primary-light/50 p-5 rounded-xl border flex flex-col justify-between">
+                        <div key={report.id} className="bg-background-primary/50 p-5 rounded-xl border flex flex-col justify-between">
                             <div>
-                                <div className="font-semibold text-text-dark font-poppins">{report.name}</div>
-                                <div className="text-xs text-text-muted mb-2">ID Laporan: {report.id}</div>
-                                <p className="text-sm text-text-dark my-2 break-words">&quot;{report.description}&quot;</p>
+                                <div className="font-semibold text-text-main font-poppins">{report.name}</div>
+                                <div className="text-xs text-text-subtle mb-2">ID Laporan: {report.id}</div>
+                                <p className="text-sm text-text-main my-2 break-words">&quot;{report.description}&quot;</p>
                                 <a 
                                     href={`https://www.google.com/maps?q=${report.latlng[0]},${report.latlng[1]}`} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="text-xs text-accent-blue hover:underline"
+                                    className="text-xs text-brand-primary hover:underline"
                                 >
                                     Lokasi: {report.latlng[0].toFixed(4)}, {report.latlng[1].toFixed(4)}
                                 </a>
@@ -128,14 +128,14 @@ const LaporanManager: React.FC = () => {
                                 <button 
                                     onClick={() => handleReject(report.id)} 
                                     disabled={isProcessing}
-                                    className="px-3 py-1 text-xs font-semibold text-text-muted bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                    className="px-3 py-1 text-xs font-semibold text-text-subtle bg-gray-200 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
                                 >
                                     {isProcessing ? 'Memproses...' : 'Tolak'}
                                 </button>
                                 <button 
                                     onClick={() => handleApprove(report.id)} 
                                     disabled={isProcessing}
-                                    className="px-3 py-1 text-xs font-semibold text-white bg-green-info hover:bg-green-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                    className="px-3 py-1 text-xs font-semibold text-white bg-status-info hover:bg-green-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
                                 >
                                     {isProcessing ? 'Memproses...' : 'Setujui'}
                                 </button>
@@ -144,7 +144,7 @@ const LaporanManager: React.FC = () => {
                     )})}
                 </div>
             ) : (
-                <p className="text-text-muted">Tidak ada laporan yang menunggu peninjauan.</p>
+                <p className="text-text-subtle">Tidak ada laporan yang menunggu peninjauan.</p>
             )}
         </Section>
     )
@@ -189,20 +189,20 @@ const BeritaManager: React.FC = () => {
         <div>
             <Section title="Tambah Berita Baru">
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm" />
-                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Berita" className="md:col-span-2 w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm" />
-                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Berita" rows={4} className="md:col-span-2 w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm"></textarea>
-                    <input type="url" value={gambar} onChange={e => setGambar(e.target.value)} placeholder="URL Gambar (opsional)" className="md:col-span-2 w-full bg-primary-light border border-gray-300 rounded-md p-2 text-sm" />
-                    <button type="submit" className="md:col-span-2 w-full bg-accent-blue text-white font-semibold py-2 rounded-lg hover:bg-accent-blue-hover">Tambah Berita</button>
+                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
+                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Berita" className="md:col-span-2 w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
+                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Berita" rows={4} className="md:col-span-2 w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm"></textarea>
+                    <input type="url" value={gambar} onChange={e => setGambar(e.target.value)} placeholder="URL Gambar (opsional)" className="md:col-span-2 w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
+                    <button type="submit" className="md:col-span-2 w-full bg-brand-primary text-white font-semibold py-2 rounded-lg hover:bg-brand-primary-hover">Tambah Berita</button>
                 </form>
             </Section>
             <Section title="Data Berita Tersimpan" className="mt-8">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-soft"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                        <thead className="bg-background-tertiary"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {isLoading ? (<tr><td colSpan={3} className="p-4 text-center">Memuat...</td></tr>) : 
-                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.date}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-red-500 hover:underline">Hapus</button></td></tr>))}
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.date}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button></td></tr>))}
                         </tbody>
                     </table>
                 </div>
@@ -259,22 +259,22 @@ const KejadianManager: React.FC = () => {
         <div>
             <Section title="Tambah Kejadian Bencana Resmi">
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <input type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Nama Lokasi, Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <input type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Koordinat, Contoh: -6.59, 106.8" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <input type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(parseInt(e.target.value))} required placeholder="Rumah Rusak" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <input type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(parseInt(e.target.value))} required placeholder="Korban Meninggal" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <input type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(parseInt(e.target.value))} required placeholder="Korban Luka" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <button type="submit" className="md:col-span-2 w-full bg-accent-blue text-white font-semibold py-2 rounded-lg hover:bg-accent-blue-hover">Tambah Kejadian</button>
+                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <input type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Nama Lokasi, Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <input type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Koordinat, Contoh: -6.59, 106.8" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <input type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(parseInt(e.target.value))} required placeholder="Rumah Rusak" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <input type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(parseInt(e.target.value))} required placeholder="Korban Meninggal" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <input type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(parseInt(e.target.value))} required placeholder="Korban Luka" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <button type="submit" className="md:col-span-2 w-full bg-brand-primary text-white font-semibold py-2 rounded-lg hover:bg-brand-primary-hover">Tambah Kejadian</button>
                 </form>
             </Section>
             <Section title="Data Kejadian Tersimpan" className="mt-8">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-soft"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Lokasi</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Meninggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                        <thead className="bg-background-tertiary"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Lokasi</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Meninggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
                          <tbody className="bg-white divide-y divide-gray-200">
                             {isLoading ? (<tr><td colSpan={4} className="p-4 text-center">Memuat...</td></tr>) : 
-                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.lokasi}</td><td className="px-4 py-2 text-sm">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID')}</td><td className="px-4 py-2 text-sm text-center">{item.meninggal}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-red-500 hover:underline">Hapus</button></td></tr>))}
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.lokasi}</td><td className="px-4 py-2 text-sm">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID')}</td><td className="px-4 py-2 text-sm text-center">{item.meninggal}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button></td></tr>))}
                         </tbody>
                     </table>
                 </div>
@@ -321,25 +321,25 @@ const MateriManager: React.FC = () => {
         <div>
             <Section title="Tambah Materi Edukasi Baru">
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select value={kategori} onChange={e => setKategori(e.target.value as any)} className="w-full bg-primary-light border p-2 rounded-md text-sm">
+                    <select value={kategori} onChange={e => setKategori(e.target.value as any)} className="w-full bg-background-primary border p-2 rounded-md text-sm">
                         <option value="pengertian">Pengertian</option>
                         <option value="penyebab">Penyebab</option>
                         <option value="penanggulangan">Penanggulangan</option>
                         <option value="mitigasi">Mitigasi</option>
                         <option value="informasi umum">Informasi Umum</option>
                     </select>
-                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Materi" className="w-full bg-primary-light border p-2 rounded-md text-sm" />
-                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Materi (HTML didukung)" rows={5} className="md:col-span-2 w-full bg-primary-light border p-2 rounded-md text-sm"></textarea>
-                    <button type="submit" className="md:col-span-2 w-full bg-accent-blue text-white font-semibold py-2 rounded-lg hover:bg-accent-blue-hover">Tambah Materi</button>
+                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Materi" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Materi (HTML didukung)" rows={5} className="md:col-span-2 w-full bg-background-primary border p-2 rounded-md text-sm"></textarea>
+                    <button type="submit" className="md:col-span-2 w-full bg-brand-primary text-white font-semibold py-2 rounded-lg hover:bg-brand-primary-hover">Tambah Materi</button>
                 </form>
             </Section>
              <Section title="Data Materi Tersimpan" className="mt-8">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-soft"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Kategori</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                        <thead className="bg-background-tertiary"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Kategori</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
                          <tbody className="bg-white divide-y divide-gray-200">
                             {isLoading ? (<tr><td colSpan={3} className="p-4 text-center">Memuat...</td></tr>) : 
-                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.category}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-red-500 hover:underline">Hapus</button></td></tr>))}
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.category}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button></td></tr>))}
                         </tbody>
                     </table>
                 </div>
@@ -368,22 +368,22 @@ const AdminPage: React.FC = () => {
     
     if (!isAuthenticated) {
         return (
-            <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-gray-soft">
+            <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-background-tertiary">
                 <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg border">
-                    <h2 className="text-2xl font-bold text-center font-poppins text-text-dark">Admin Login</h2>
+                    <h2 className="text-2xl font-bold text-center font-poppins text-text-main">Admin Login</h2>
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label htmlFor="password-admin" className="block text-sm font-medium text-text-dark mb-1">Password</label>
+                            <label htmlFor="password-admin" className="block text-sm font-medium text-text-main mb-1">Password</label>
                             <input
                                 id="password-admin"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-primary-light border border-gray-300 rounded-md p-2.5 text-sm text-text-dark placeholder-gray-400 focus:ring-accent-blue focus:border-accent-blue"
+                                className="w-full bg-background-primary border border-gray-300 rounded-md p-2.5 text-sm text-text-main placeholder-gray-400 focus:ring-brand-primary focus:border-brand-primary"
                             />
                         </div>
                         {error && <p className="text-sm text-red-500">{error}</p>}
-                        <button type="submit" className="w-full bg-accent-blue text-white font-poppins font-semibold py-2.5 rounded-lg hover:bg-accent-blue-hover transition-all duration-300">
+                        <button type="submit" className="w-full bg-brand-primary text-white font-poppins font-semibold py-2.5 rounded-lg hover:bg-brand-primary-hover transition-all duration-300">
                             Login
                         </button>
                     </form>
@@ -393,11 +393,11 @@ const AdminPage: React.FC = () => {
     }
 
     return (
-        <div className="bg-primary-light min-h-screen">
-            <div className="bg-secondary-light py-12 border-b border-gray-200">
+        <div className="bg-background-primary min-h-screen">
+            <div className="bg-background-secondary py-12 border-b border-gray-200">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-4xl font-poppins font-bold text-text-dark">Dasbor Admin</h1>
-                    <p className="mt-2 text-lg text-text-muted">Kelola konten, data, dan laporan untuk seluruh aplikasi SIGLON.</p>
+                    <h1 className="text-4xl font-poppins font-bold text-text-main">Dasbor Admin</h1>
+                    <p className="mt-2 text-lg text-text-subtle">Kelola konten, data, dan laporan untuk seluruh aplikasi SIGLON.</p>
                 </div>
             </div>
 
