@@ -7,9 +7,9 @@ import Pagination from '../components/Pagination';
 type Tab = 'Berita' | 'Pengetahuan' | 'Longsor';
 
 const PageHeader: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
-    <div className="bg-background-secondary py-12 border-b border-gray-200">
+    <div className="bg-background-secondary py-8 sm:py-12 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl font-poppins font-bold text-text-main">{title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-poppins font-bold text-text-main">{title}</h1>
             <p className="mt-2 text-lg text-text-subtle">{subtitle}</p>
         </div>
     </div>
@@ -274,7 +274,7 @@ const KnowledgeBasePage: React.FC = () => {
             
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="border-b border-gray-200 mb-8">
-                    <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+                    <nav className="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto" aria-label="Tabs">
                         <TabButton active={activeTab === 'Longsor'} onClick={() => navigate('/pengetahuan#longsor')}>Info Tanah Longsor</TabButton>
                         <TabButton active={activeTab === 'Pengetahuan'} onClick={() => navigate('/pengetahuan#pengetahuan')}>Pengetahuan Bencana</TabButton>
                         <TabButton active={activeTab === 'Berita'} onClick={() => navigate('/pengetahuan#berita')}>Berita</TabButton>

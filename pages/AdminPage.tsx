@@ -578,15 +578,15 @@ const AdminPage: React.FC = () => {
 
     return (
         <div className="bg-background-primary min-h-screen">
-            <div className="bg-background-secondary py-12 border-b border-gray-200">
+            <div className="bg-background-secondary py-8 sm:py-12 border-b border-gray-200">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-4xl font-poppins font-bold text-text-main">Dasbor Admin</h1>
+                    <h1 className="text-3xl sm:text-4xl font-poppins font-bold text-text-main">Dasbor Admin</h1>
                     <p className="mt-2 text-lg text-text-subtle">Kelola konten, data, dan laporan untuk seluruh aplikasi SIGLON.</p>
                 </div>
             </div>
 
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                 <div className="flex space-x-2 border-b border-gray-200 pb-4">
+                 <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4">
                     <TabButton active={activeTab === 'laporan'} onClick={() => setActiveTab('laporan')}>Laporan Pending</TabButton>
                     <TabButton active={activeTab === 'berita'} onClick={() => setActiveTab('berita')}>Kelola Berita</TabButton>
                     <TabButton active={activeTab === 'kejadian'} onClick={() => setActiveTab('kejadian')}>Kelola Kejadian</TabButton>

@@ -107,7 +107,7 @@ const Navbar: React.FC = () => {
                                 <div key={link.name}>
                                     <button onClick={() => toggleMobileSubmenu(link.name)} className={`w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${location.pathname.startsWith(link.path) ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
                                        <span>{link.name}</span>
-                                       <ChevronDownIcon className={`transition-transform duration-200 ${mobileSubmenuOpen === link.name ? 'rotate-180' : ''}`} />
+                                       <ChevronDownIcon className={`h-6 w-6 transition-transform duration-200 ${mobileSubmenuOpen === link.name ? 'rotate-180' : ''}`} />
                                     </button>
                                     {mobileSubmenuOpen === link.name && (
                                         <div className="pl-5 mt-1 space-y-1">
@@ -197,7 +197,7 @@ const App: React.FC = () => {
             <ScrollToTop />
             <div className="flex flex-col min-h-screen">
                 <Navbar />
-                <main className="flex-grow">
+                <main className="flex-grow relative z-10">
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/peta" element={<MapPage />} />

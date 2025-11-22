@@ -16,7 +16,7 @@ const AboutPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
                 <div className="prose prose-lg max-w-none text-text-subtle prose-headings:text-text-main prose-headings:font-poppins">
                     <p className="lead text-text-main">
                         SIGLON (Sistem Informasi Geospasial Tanah Longsor Nasional) adalah sebuah inisiatif berbasis web yang didedikasikan untuk menjadi pusat informasi, pemantauan, dan edukasi mengenai bencana tanah longsor di Indonesia.

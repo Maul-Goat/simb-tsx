@@ -119,6 +119,29 @@ const WarningBanner: React.FC = () => {
     )
 }
 
+// New, improved solid icons for Knowledge Section
+const InfoIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.346-.777-3.236 0L9.172 9.172a.75.75 0 01-1.06 1.06l.89-.89a3 3 0 014.242 0l.89.89a.75.75 0 01-1.06-1.06l-.89-.89zM12 14.25a.75.75 0 01.75.75v.008c0 .414-.336.75-.75.75h-.008a.75.75 0 01-.75-.75v-.008c0-.414.336-.75.75-.75z" clipRule="evenodd" />
+    </svg>
+);
+const TriggerIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" clipRule="evenodd" />
+    </svg>
+);
+const ShieldIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M12 2.25c-5.05 0-9.25 4.2-9.25 9.375V15c0 .405.18.785.483 1.037l4.026 3.451c.36.31.84.382 1.266.186a11.95 11.95 0 009.95 0c.426.196.906.124 1.266-.186l4.026-3.451c.303-.252.483-.632.483-1.037v-3.375C21.25 6.45 17.05 2.25 12 2.25zm2.842 12.344a.75.75 0 001.06-1.06l-4.5-4.5a.75.75 0 00-1.06 0l-2.25 2.25a.75.75 0 001.06 1.06l1.72-1.72 3.97 3.97z" clipRule="evenodd" />
+    </svg>
+);
+const LayersIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z"/>
+    </svg>
+);
+
+
 const HomePage: React.FC = () => {
     const [newsData, setNewsData] = useState<NewsArticle[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -207,7 +230,7 @@ const HomePage: React.FC = () => {
             </Section>
             
             <Section title="Peta Sebaran Longsor" subtitle="Pantau lokasi kejadian tanah longsor aktif di seluruh Indonesia berdasarkan data terbaru.">
-                <div className="h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative z-0">
+                <div className="h-[60vh] md:h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative z-0">
                     {isLoadingMap ? (
                         <div className="flex items-center justify-center h-full bg-background-tertiary">
                             <p className="text-text-subtle">Memuat Peta...</p>
@@ -275,13 +298,18 @@ const HomePage: React.FC = () => {
             <Section title="Pengetahuan Mitigasi Bencana" subtitle="Tingkatkan pemahaman Anda untuk mengurangi risiko dan dampak dari bencana tanah longsor.">
                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                      {[
-                         { title: "Apa itu Tanah Longsor?", link: "/pengetahuan#longsor" },
-                         { title: "Penyebab & Pemicu", link: "/pengetahuan#longsor" },
-                         { title: "Pencegahan & Mitigasi", link: "/pengetahuan#longsor" },
-                         { title: "Jenis-jenis Longsor", link: "/pengetahuan#longsor" },
+                         { title: "Apa itu Tanah Longsor?", link: "/pengetahuan#longsor", icon: InfoIcon },
+                         { title: "Penyebab & Pemicu", link: "/pengetahuan#longsor", icon: TriggerIcon },
+                         { title: "Pencegahan & Mitigasi", link: "/pengetahuan#longsor", icon: ShieldIcon },
+                         { title: "Jenis-jenis Longsor", link: "/pengetahuan#longsor", icon: LayersIcon },
                      ].map(item => (
-                         <Link key={item.title} to={item.link} className="block p-8 bg-background-secondary rounded-2xl shadow-lg border border-gray-200 text-center transform hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-brand-primary/20">
-                             <h3 className="font-poppins font-semibold text-lg text-text-main">{item.title}</h3>
+                         <Link 
+                            key={item.title} 
+                            to={item.link} 
+                            className="flex flex-col items-center justify-start p-8 bg-background-secondary rounded-2xl shadow-lg border border-gray-200 text-center transform hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-brand-primary/20 group"
+                         >
+                            <item.icon className="h-16 w-16 text-brand-primary mb-6 transition-transform duration-300 group-hover:scale-110" />
+                             <h3 className="font-poppins font-semibold text-lg text-text-main h-full flex items-center">{item.title}</h3>
                          </Link>
                      ))}
                  </div>

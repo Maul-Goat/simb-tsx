@@ -8,9 +8,9 @@ import { DetailedLandslideEvent, ProvinceStat } from '../types';
 const PatchedPie = Pie as React.ComponentType<React.ComponentProps<typeof Pie> & { activeIndex?: number }>;
 
 const PageHeader: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
-    <div className="bg-background-secondary py-12 border-b border-gray-200">
+    <div className="bg-background-secondary py-8 sm:py-12 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl font-poppins font-bold text-text-main">{title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-poppins font-bold text-text-main">{title}</h1>
             <p className="mt-2 text-lg text-text-subtle">{subtitle}</p>
         </div>
     </div>
@@ -39,7 +39,7 @@ const SortableTableHeader: React.FC<{
     const isSorted = sortConfig?.key === column;
     const directionIcon = isSorted ? (sortConfig?.direction === 'ascending' ? '▲' : '▼') : '';
     return (
-        <th scope="col" className="px-6 py-3 text-left text-xs font-poppins font-bold text-text-main uppercase tracking-wider cursor-pointer" onClick={() => requestSort(column)}>
+        <th scope="col" className="px-3 py-3 sm:px-6 text-left text-xs font-poppins font-bold text-text-main uppercase tracking-wider cursor-pointer" onClick={() => requestSort(column)}>
             {label} {directionIcon}
         </th>
     );
@@ -50,10 +50,10 @@ const renderActiveShape = (props: any) => {
 
     return (
         <g>
-            <text x={cx} y={cy} dy={-6} textAnchor="middle" fill="#3D2C21" className="text-lg font-poppins font-bold">
+            <text x={cx} y={cy} dy={-6} textAnchor="middle" fill="#3D2C21" className="text-base sm:text-lg font-poppins font-bold">
                 {payload.name}
             </text>
-             <text x={cx} y={cy} dy={20} textAnchor="middle" fill={fill} className="text-xl font-poppins font-semibold">
+             <text x={cx} y={cy} dy={20} textAnchor="middle" fill={fill} className="text-lg sm:text-xl font-poppins font-semibold">
                 {`${(percent * 100).toFixed(0)}%`}
             </text>
             <Sector
@@ -169,7 +169,7 @@ const StatsPage: React.FC = () => {
                     </div>
                  ) : (
                     <>
-                    <section className="bg-background-secondary p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+                    <section className="bg-background-secondary p-4 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
                         <h2 className="text-2xl font-poppins font-semibold mb-6 text-text-main">Tabel Rincian Kejadian Bencana</h2>
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
@@ -188,14 +188,14 @@ const StatsPage: React.FC = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {sortedData.map((item) => (
                                         <tr key={item.no} className="hover:bg-background-tertiary">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-subtle">{item.no}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{item.lokasi}</td>
-                                            <td className="px-6 py-4 text-sm text-text-main max-w-xs truncate" title={item.deskripsi}>{item.deskripsi}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{item.provinsi}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.meninggal}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.terluka}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.rumahRusak}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-text-subtle">{item.no}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-text-main">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-text-main">{item.lokasi}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm text-text-main max-w-[100px] sm:max-w-xs truncate" title={item.deskripsi}>{item.deskripsi}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-text-main">{item.provinsi}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-center">{item.meninggal}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-center">{item.terluka}</td>
+                                            <td className="px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-center">{item.rumahRusak}</td>
                                         </tr>
                                     ))}
                                 </tbody>

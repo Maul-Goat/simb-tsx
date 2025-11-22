@@ -207,7 +207,7 @@ const MapPage: React.FC = () => {
 
                 </MapContainer>
                 {/* Map Legend */}
-                <div className="absolute bottom-4 right-4 z-[1000] bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200">
+                <div className="absolute top-4 right-4 lg:bottom-4 lg:top-auto z-[1000] bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200">
                     <h4 className="font-poppins font-semibold text-sm mb-2 text-text-main">Legenda</h4>
                     <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-orange-500 rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Data Resmi</span></div>
                     <div className="flex items-center space-x-2 mt-1"><div className="w-4 h-4 bg-blue-500 rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Laporan (Pending)</span></div>
