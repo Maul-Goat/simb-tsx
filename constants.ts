@@ -51,9 +51,9 @@ export const XIcon: React.FC = () => (
     )
 );
 
-export const LogoIcon: React.FC = () => (
+export const LogoIcon: React.FC<{ className?: string }> = ({ className = "h-8 w-8 text-brand-primary" }) => (
     React.createElement('svg', {
-        className: "h-8 w-8 text-brand-primary",
+        className: className,
         fill: "currentColor",
         viewBox: "0 0 20 20"
     },

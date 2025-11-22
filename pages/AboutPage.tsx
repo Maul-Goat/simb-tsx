@@ -4,13 +4,13 @@ import { LogoIcon } from '../constants';
 const AboutPage: React.FC = () => {
     return (
         <div className="bg-background-primary min-h-screen">
-            <div className="bg-background-secondary border-b border-gray-200">
+            <div className="bg-brand-primary">
                 <div className="max-w-6xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
                     <div className="flex justify-center items-center gap-4 mb-4">
-                        <LogoIcon />
-                        <h1 className="text-4xl font-poppins font-bold tracking-tight text-text-main sm:text-5xl lg:text-6xl">Tentang SIGLON</h1>
+                        <LogoIcon className="h-8 w-8 text-white" />
+                        <h1 className="text-4xl font-poppins font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">Tentang SIGLON</h1>
                     </div>
-                    <p className="mt-4 max-w-3xl mx-auto text-xl text-text-subtle">
+                    <p className="mt-4 max-w-3xl mx-auto text-xl text-gray-200">
                         Mengenal, Mencegah, dan Memantau Tanah Longsor di Indonesia.
                     </p>
                 </div>
