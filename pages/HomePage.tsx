@@ -9,7 +9,7 @@ import { Navigation, Pagination as SwiperPagination, Autoplay, EffectFade } from
 import { getNewsData, getOfficialLandslideData, getDetailedLandslideData } from './DatabasePage';
 import { NewsArticle, LandslideFeatureCollection } from '../types';
 import { XIcon } from '../constants';
-import { Pagination } from '../components/Pagination';
+import Pagination from '../components/Pagination';
 
 const orangeIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
