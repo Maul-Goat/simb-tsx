@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
-import { getNewsData, getKnowledgeData, getNewsArticleById } from '../data/database';
+import { getNewsData, getKnowledgeData, getNewsArticleById } from './DatabasePage';
 import { NewsArticle, KnowledgeArticle } from '../types';
 import { Pagination } from './HomePage';
 

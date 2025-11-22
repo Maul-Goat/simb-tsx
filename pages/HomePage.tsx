@@ -6,7 +6,7 @@ import CountUp from 'react-countup';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination as SwiperPagination, Autoplay, EffectFade } from 'swiper/modules';
 
-import { getNewsData, getOfficialLandslideData, getDetailedLandslideData } from '../data/database';
+import { getNewsData, getOfficialLandslideData, getDetailedLandslideData } from './DatabasePage';
 import { NewsArticle, LandslideFeatureCollection } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '../constants';
 

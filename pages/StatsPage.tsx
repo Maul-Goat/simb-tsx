@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
-import { getDetailedLandslideData } from '../data/database';
+import { getDetailedLandslideData } from './DatabasePage';
 import { DetailedLandslideEvent, ProvinceStat } from '../types';
 
 // FIX: The installed @types/recharts version may be missing the 'activeIndex' prop.

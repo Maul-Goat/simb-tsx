@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { getOfficialLandslideData, getPendingUserReports, addUserReport } from '../data/database';
+import { getOfficialLandslideData, getPendingUserReports, addUserReport } from './DatabasePage';
 import { LandslideFeatureCollection, UserReport } from '../types';
 
 // Official Data Marker

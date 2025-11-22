@@ -15,7 +15,7 @@ import {
     uploadBeritaImage,
     addOfficialLandslide,
     addMateri
-} from '../data/database';
+} from './DatabasePage';
 import { UserReport, NewsArticle, DetailedLandslideEvent, KnowledgeArticle } from '../types';
 
 type Tab = 'laporan' | 'berita' | 'kejadian' | 'materi';
