@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { getOfficialLandslideData, getPendingUserReports, addUserReport } from './DatabasePage';
@@ -73,12 +73,12 @@ const MapPage: React.FC = () => {
     const markerRefs = useRef<Record<number, L.Marker | null>>({});
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-    const worldBounds: L.LatLngBoundsExpression = [
-        [-90, -180], // Southwest
-        [90, 180],    // Northeast
+    const indonesiaBounds: L.LatLngBoundsExpression = [
+        [-11, 95], // Southwest
+        [6, 141],    // Northeast
     ];
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
             const [official, pending] = await Promise.all([
@@ -91,14 +91,16 @@ const MapPage: React.FC = () => {
             setPendingReports(pending);
         } catch (error) {
             console.error("Failed to fetch map data:", error);
+            setOfficialData(null);
+            setPendingReports([]);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
     
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     const handleMapClick = (latlng: L.LatLng) => {
         setNewReportLocation(latlng);
@@ -149,8 +151,8 @@ const MapPage: React.FC = () => {
                     scrollWheelZoom={true} 
                     style={{ height: '100%', width: '100%', backgroundColor: '#F5F2EC' }} 
                     worldCopyJump={true} 
-                    minZoom={2}
-                    maxBounds={worldBounds}
+                    minZoom={5}
+                    maxBounds={indonesiaBounds}
                     maxBoundsViscosity={1.0}
                 >
                     <TileLayer

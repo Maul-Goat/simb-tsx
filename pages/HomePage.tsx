@@ -1,291 +1,217 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import CountUp from 'react-countup';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination as SwiperPagination, Autoplay, EffectFade } from 'swiper/modules';
+import React from 'react';
+import { HashRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
+import StatsPage from './pages/StatsPage';
+import KnowledgeBasePage from './pages/KnowledgeBasePage';
+import AboutPage from './pages/AboutPage';
+import AdminPage from './pages/AdminPage';
+import { NAV_LINKS } from './constants';
+import { MenuIcon, XIcon, LogoIcon, ChevronDownIcon } from './constants';
+import { useState, useRef, useEffect } from 'react';
 
-import { getNewsData, getOfficialLandslideData, getDetailedLandslideData } from './DatabasePage';
-import { NewsArticle, LandslideFeatureCollection } from '../types';
-import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '../constants';
+const Navbar: React.FC = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
+    const location = useLocation();
+    const timeoutRef = useRef<number | null>(null);
 
-const orangeIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+    useEffect(() => {
+        setIsOpen(false);
+        setMobileSubmenuOpen(null);
+    }, [location]);
 
-const Section: React.FC<{ children: React.ReactNode; className?: string; title: string; subtitle?: string; }> = ({ children, className = '', title, subtitle }) => (
-    <section className={`py-16 sm:py-24 ${className}`}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl font-poppins font-bold text-text-main sm:text-4xl">{title}</h2>
-                {subtitle && <p className="mt-4 text-lg text-text-subtle max-w-3xl mx-auto">{subtitle}</p>}
-            </div>
-            {children}
-        </div>
-    </section>
-);
+    const handleMouseEnter = (name: string) => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+        setOpenDropdown(name);
+    };
 
-const HeroCarousel: React.FC = () => {
-    return (
-        <div className="relative h-[50vh] min-h-[400px] text-white rounded-2xl overflow-hidden shadow-lg">
-            <Swiper
-                modules={[Navigation, SwiperPagination, Autoplay, EffectFade]}
-                className="h-full"
-                spaceBetween={0}
-                slidesPerView={1}
-                navigation
-                pagination={{ clickable: true }}
-                loop={true}
-                autoplay={{ delay: 5000, disableOnInteraction: false }}
-                effect="fade"
-                fadeEffect={{ crossFade: true }}
-            >
-                {[
-                    { img: "https://picsum.photos/seed/hero1/1920/1080", title: "Pemantauan Real-Time", sub: "Data tanah longsor terkini dari sumber terpercaya di seluruh Indonesia." },
-                    { img: "https://picsum.photos/seed/hero2/1920/1080", title: "Edukasi & Mitigasi", sub: "Pahami penyebab, jenis, dan cara pencegahan tanah longsor." },
-                    { img: "https://picsum.photos/seed/hero3/1920/1080", title: "Statistik & Analisis", sub: "Visualisasi data kejadian, korban, dan wilayah terdampak." },
-                ].map((slide, index) => (
-                    <SwiperSlide key={index}>
-                        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.img})` }}></div>
-                        <div className="absolute inset-0 bg-black/50"></div>
-                        <div className="relative h-full flex flex-col justify-center items-center text-center px-4">
-                            <h1 className="text-4xl md:text-5xl font-poppins font-bold tracking-tight mb-4 animate-fade-in-down">{slide.title}</h1>
-                            <p className="text-lg md:text-xl max-w-3xl text-gray-200 mb-8 animate-fade-in-up">{slide.sub}</p>
-                            <Link to="/peta" className="bg-brand-primary text-white font-poppins font-medium uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-brand-primary-hover transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_theme(colors.brand-primary)]">
-                                Pelajari Lebih Lanjut
-                            </Link>
-                        </div>
-                    </SwiperSlide>
-                ))}
-            </Swiper>
-        </div>
-    );
-};
-
-const NewsCard: React.FC<{ article: NewsArticle }> = ({ article }) => {
-    const commonClasses = "bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-2 transition-transform duration-300 flex flex-col group";
+    const handleMouseLeave = () => {
+        timeoutRef.current = window.setTimeout(() => {
+            setOpenDropdown(null);
+        }, 100);
+    };
     
-    const cardContent = (
-        <>
-            <div className="overflow-hidden">
-                <img className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300" src={article.image} alt={article.title} />
-            </div>
-            <div className="p-6 flex flex-col flex-grow">
-                <p className="text-sm text-brand-primary font-semibold">{article.date}</p>
-                <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
-                <p className="mt-2 text-sm text-text-subtle">{article.summary}</p>
-                <div className="mt-4 text-sm font-poppins font-medium text-brand-primary group-hover:underline group-hover:text-brand-primary-hover transition-colors duration-200 text-left">Baca Selengkapnya</div>
-            </div>
-        </>
-    );
-
-    if (article.sourceUrl) {
-        return (
-            <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className={commonClasses}>
-                {cardContent}
-            </a>
-        );
+    const toggleMobileSubmenu = (name: string) => {
+        setMobileSubmenuOpen(prev => (prev === name ? null : name));
     }
 
     return (
-        <Link to={`/berita/${article.id}`} className={commonClasses}>
-            {cardContent}
-        </Link>
-    );
-};
-
-const WarningBanner: React.FC = () => {
-    const [isVisible, setIsVisible] = useState(true);
-    if (!isVisible) return null;
-
-    return (
-        <div className="bg-status-warning/10 border-l-4 border-status-warning text-status-warning p-4 rounded-r-lg mb-8" role="alert">
-            <div className="flex">
-                <div className="py-1"><svg className="fill-current h-6 w-6 text-status-warning mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 5v6h2V5H9zm0 8h2v2H9v-2z"/></svg></div>
-                <div>
-                    <p className="font-bold font-poppins">Peringatan Dini Cuaca Ekstrem</p>
-                    <p className="text-sm">Waspada potensi hujan lebat yang dapat disertai kilat/petir dan angin kencang di sebagian besar wilayah Indonesia. Tingkatkan kesiapsiagaan terhadap potensi bencana hidrometeorologi seperti banjir dan tanah longsor.</p>
+        <header className="bg-carbon-black sticky top-0 z-50 shadow-lg">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-20">
+                    <NavLink to="/" className="flex-shrink-0 flex items-center gap-2 group">
+                        <LogoIcon />
+                        <span className="text-2xl font-poppins font-bold text-white group-hover:text-brand-primary transition-colors duration-200">SIGLON</span>
+                    </NavLink>
+                    <div className="hidden md:block">
+                        <nav className="ml-10 flex items-baseline space-x-1">
+                            {NAV_LINKS.map((link) =>
+                                link.subLinks ? (
+                                    <div key={link.name} className="relative" onMouseEnter={() => handleMouseEnter(link.name)} onMouseLeave={handleMouseLeave}>
+                                        <button className={`px-3 py-2 rounded-md text-sm font-poppins font-medium flex items-center gap-1 transition-all duration-300 ${location.pathname.startsWith(link.path) ? 'bg-brand-primary text-white shadow-[0_0_10px_theme(colors.brand-primary)]' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
+                                            {link.name}
+                                            <ChevronDownIcon />
+                                        </button>
+                                        {openDropdown === link.name && (
+                                            <div className="absolute top-full mt-2 w-56 rounded-xl shadow-lg bg-carbon-black ring-1 ring-gray-700 py-2 z-10 animate-fade-in-down origin-top-right">
+                                                {link.subLinks.map(subLink => (
+                                                    <NavLink
+                                                        key={subLink.name}
+                                                        to={subLink.path}
+                                                        className={({ isActive }) => `block px-4 py-2 text-sm font-poppins ${isActive ? 'text-brand-primary' : 'text-gray-300'} hover:bg-gray-700 hover:text-white`}
+                                                    >
+                                                        {subLink.name}
+                                                    </NavLink>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <NavLink
+                                        key={link.name}
+                                        to={link.path}
+                                        className={({ isActive }) =>
+                                            `px-3 py-2 rounded-md text-sm font-poppins font-medium transition-all duration-300 ${isActive ? 'bg-brand-primary text-white shadow-[0_0_10px_theme(colors.brand-primary)]' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`
+                                        }
+                                    >
+                                        {link.name}
+                                    </NavLink>
+                                )
+                            )}
+                        </nav>
+                    </div>
+                    <div className="-mr-2 flex md:hidden">
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            type="button"
+                            className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:bg-brand-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-background-primary focus:ring-brand-primary"
+                            aria-controls="mobile-menu"
+                            aria-expanded="false"
+                        >
+                            <span className="sr-only">Open main menu</span>
+                            {isOpen ? <XIcon /> : <MenuIcon />}
+                        </button>
+                    </div>
                 </div>
-                <button onClick={() => setIsVisible(false)} className="ml-auto flex-shrink-0 p-1"><XIcon /></button>
-            </div>
-        </div>
-    )
-}
-
-export const Pagination: React.FC<{ currentPage: number, totalPages: number, onPageChange: (page: number) => void }> = ({ currentPage, totalPages, onPageChange }) => (
-    <div className="flex justify-center items-center space-x-2 mt-8">
-        <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="p-2 rounded-md bg-white border border-gray-300 disabled:opacity-50 hover:bg-gray-100 transition-colors"><ChevronLeftIcon /></button>
-        <span className="text-sm font-medium text-text-subtle">Halaman {currentPage} dari {totalPages}</span>
-        <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="p-2 rounded-md bg-white border border-gray-300 disabled:opacity-50 hover:bg-gray-100 transition-colors"><ChevronRightIcon /></button>
-    </div>
-);
-
-
-const HomePage: React.FC = () => {
-    const [newsData, setNewsData] = useState<NewsArticle[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [landslideData, setLandslideData] = useState<LandslideFeatureCollection | null>(null);
-    const [stats, setStats] = useState({ totalKejadian: 0, korbanJiwa: 0, provinsiTerdampak: 0 });
-    const [isLoadingMap, setIsLoadingMap] = useState(true);
-    const [isLoadingNews, setIsLoadingNews] = useState(true);
-    const [isLoadingStats, setIsLoadingStats] = useState(true);
-
-    useEffect(() => {
-        const fetchMapData = async () => {
-            setIsLoadingMap(true);
-            try {
-                const data = await getOfficialLandslideData(100);
-                setLandslideData(data);
-            } catch (error) {
-                console.error("Failed to fetch landslide data:", error);
-            } finally {
-                setIsLoadingMap(false);
-            }
-        };
-
-        const fetchNewsData = async () => {
-            setIsLoadingNews(true);
-            try {
-                const data = await getNewsData();
-                setNewsData(data);
-            } catch (error) {
-                console.error("Failed to fetch news data:", error);
-            } finally {
-                setIsLoadingNews(false);
-            }
-        };
-        
-        const fetchStatsData = async () => {
-            setIsLoadingStats(true);
-            try {
-                const detailedData = await getDetailedLandslideData();
-                const totalKejadian = detailedData.length;
-                const korbanJiwa = detailedData.reduce((sum, event) => sum + event.meninggal, 0);
-                const provinsiTerdampak = new Set(detailedData.map(event => event.provinsi)).size;
-                setStats({ totalKejadian, korbanJiwa, provinsiTerdampak });
-            } catch (error) {
-                console.error("Failed to fetch stats data:", error);
-            } finally {
-                setIsLoadingStats(false);
-            }
-        };
-
-        fetchMapData();
-        fetchNewsData();
-        fetchStatsData();
-    }, []);
-
-    const articlesPerPage = 3;
-    const totalPages = Math.ceil(newsData.length / articlesPerPage);
-    const currentArticles = newsData.slice((currentPage - 1) * articlesPerPage, currentPage * articlesPerPage);
-
-    return (
-        <div className="bg-background-primary">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <WarningBanner />
-                <HeroCarousel />
             </div>
 
-            <Section title="Berita Terbaru" className="bg-background-tertiary">
-                {isLoadingNews ? (
-                    <div className="text-center text-text-subtle">Memuat berita...</div>
-                ) : (
-                    <>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {currentArticles.map(article => <NewsCard key={article.id} article={article} />)}
-                        </div>
-                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                        <div className="text-center mt-8">
-                            <Link 
-                                to="/pengetahuan#berita" 
-                                className="inline-block bg-brand-primary text-white font-poppins font-medium px-8 py-3 rounded-lg hover:bg-brand-primary-hover transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-brand-primary/40"
-                            >
-                                Lihat Semua Berita
-                            </Link>
-                        </div>
-                    </>
-                )}
-            </Section>
-            
-            <Section title="Peta Sebaran Longsor" subtitle="Pantau lokasi kejadian tanah longsor aktif di seluruh Indonesia berdasarkan data terbaru.">
-                <div className="h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative">
-                    {isLoadingMap ? (
-                        <div className="flex items-center justify-center h-full bg-background-tertiary">
-                            <p className="text-text-subtle">Memuat Peta...</p>
-                        </div>
-                    ) : (
-                        <MapContainer center={[-2.548926, 118.0148634]} zoom={5} scrollWheelZoom={false} style={{ height: '100%', width: '100%', backgroundColor: '#FDFBF7' }} worldCopyJump={true} minZoom={2}>
-                            <TileLayer
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                            />
-                            {landslideData?.features.map(point => (
-                                <Marker key={point.properties.id} position={[point.geometry.coordinates[1], point.geometry.coordinates[0]]} icon={orangeIcon}>
-                                    <Popup>
-                                        <div className="font-poppins">
-                                            <h4 className="font-bold text-base mb-1">{point.properties.lokasi}</h4>
-                                            <p className="text-xs">Tanggal: {point.properties.tanggal}</p>
-                                            <p className="text-xs">Korban Jiwa: {point.properties.korban_meninggal}</p>
-                                            {point.properties.deskripsi && <p className="text-xs mt-1"><strong>Deskripsi:</strong> {point.properties.deskripsi}</p>}
-                                            <p className="text-xs font-semibold mt-1">Sumber: {point.properties.sumber}</p>
+            {isOpen && (
+                <div className="md:hidden" id="mobile-menu">
+                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        {NAV_LINKS.map((link) =>
+                            link.subLinks ? (
+                                <div key={link.name}>
+                                    <button onClick={() => toggleMobileSubmenu(link.name)} className={`w-full text-left flex justify-between items-center px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${location.pathname.startsWith(link.path) ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
+                                       <span>{link.name}</span>
+                                       <ChevronDownIcon className={`transition-transform duration-200 ${mobileSubmenuOpen === link.name ? 'rotate-180' : ''}`} />
+                                    </button>
+                                    {mobileSubmenuOpen === link.name && (
+                                        <div className="pl-5 mt-1 space-y-1">
+                                            {link.subLinks.map(subLink => (
+                                                 <NavLink
+                                                    key={subLink.name}
+                                                    to={subLink.path}
+                                                    className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${isActive ? 'bg-brand-primary/80 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+                                                 >
+                                                    {subLink.name}
+                                                 </NavLink>
+                                            ))}
                                         </div>
-                                    </Popup>
-                                </Marker>
-                            ))}
-                        </MapContainer>
-                    )}
-                </div>
-            </Section>
-            
-            <Section title="Statistik Kejadian" className="bg-background-tertiary">
-                {isLoadingStats ? (
-                    <div className="text-center text-text-subtle">Memuat statistik...</div>
-                ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                    <div className="bg-background-secondary p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-status-highlight/20">
-                        <h3 className="text-5xl font-poppins font-bold text-status-highlight">
-                            <CountUp end={stats.totalKejadian} duration={3} enableScrollSpy />
-                        </h3>
-                        <p className="mt-2 text-lg text-text-subtle">Total Kejadian</p>
-                    </div>
-                     <div className="bg-background-secondary p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-status-warning/20">
-                        <h3 className="text-5xl font-poppins font-bold text-status-warning">
-                             <CountUp end={stats.korbanJiwa} duration={3} enableScrollSpy />
-                        </h3>
-                        <p className="mt-2 text-lg text-text-subtle">Korban Jiwa</p>
-                    </div>
-                     <div className="bg-background-secondary p-8 rounded-2xl border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl hover:shadow-status-highlight/20">
-                        <h3 className="text-5xl font-poppins font-bold text-status-highlight">
-                             <CountUp end={stats.provinsiTerdampak} duration={3} enableScrollSpy />
-                        </h3>
-                        <p className="mt-2 text-lg text-text-subtle">Provinsi Terdampak</p>
+                                    )}
+                                </div>
+                            ) : (
+                                <NavLink
+                                    key={link.name}
+                                    to={link.path}
+                                    className={({ isActive }) =>
+                                        `block px-3 py-2 rounded-md text-base font-poppins font-medium transition-colors duration-200 ${isActive ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`
+                                    }
+                                >
+                                    {link.name}
+                                </NavLink>
+                            )
+                        )}
                     </div>
                 </div>
-                )}
-            </Section>
-
-            <Section title="Pengetahuan Mitigasi Bencana" subtitle="Tingkatkan pemahaman Anda untuk mengurangi risiko dan dampak dari bencana tanah longsor.">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                     {[
-                         { title: "Apa itu Tanah Longsor?", link: "/pengetahuan#longsor" },
-                         { title: "Penyebab & Pemicu", link: "/pengetahuan#longsor" },
-                         { title: "Pencegahan & Mitigasi", link: "/pengetahuan#longsor" },
-                         { title: "Jenis-jenis Longsor", link: "/pengetahuan#longsor" },
-                     ].map(item => (
-                         <Link key={item.title} to={item.link} className="block p-8 bg-background-secondary rounded-2xl shadow-lg border border-gray-200 text-center transform hover:-translate-y-2 transition-transform duration-300 hover:shadow-xl hover:shadow-brand-primary/20">
-                             <h3 className="font-poppins font-semibold text-lg text-text-main">{item.title}</h3>
-                         </Link>
-                     ))}
-                 </div>
-            </Section>
-        </div>
+            )}
+        </header>
     );
 };
 
-export default HomePage;
+
+const Footer: React.FC = () => {
+    return (
+        <footer className="bg-carbon-black border-t border-gray-800">
+            <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <LogoIcon />
+                            <h3 className="text-xl font-poppins font-bold text-white">SIGLON</h3>
+                        </div>
+                        <p className="text-sm text-gray-400 max-w-xs">Mengenal, Mencegah, dan Memantau Tanah Longsor di Indonesia.</p>
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-poppins font-semibold text-gray-200 uppercase tracking-wider">Navigasi</h3>
+                        <ul className="mt-4 space-y-2">
+                            {NAV_LINKS.map((link) => (
+                                <li key={`footer-${link.name}`}>
+                                    <NavLink to={link.path} className="text-base text-gray-400 hover:text-brand-primary transition-colors duration-200">
+                                        {link.name}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div>
+                         <h3 className="text-sm font-poppins font-semibold text-gray-200 uppercase tracking-wider">Sumber Data</h3>
+                         <p className="mt-4 text-base text-gray-400">Data kejadian bencana bersumber dari Data Informasi Bencana Indonesia (DIBI) yang dikelola oleh Badan Nasional Penanggulangan Bencana (BNPB).</p>
+                    </div>
+                </div>
+                <div className="mt-8 border-t border-gray-700 pt-8 text-center text-sm text-gray-400">
+                    <p>&copy; {new Date().getFullYear()} SIGLON. Semua hak dilindungi.</p>
+                </div>
+            </div>
+        </footer>
+    );
+};
+
+
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
+const App: React.FC = () => {
+    return (
+        <HashRouter>
+            <ScrollToTop />
+            <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-grow relative z-10">
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/peta" element={<MapPage />} />
+                        <Route path="/statistik" element={<StatsPage />} />
+                        <Route path="/pengetahuan" element={<KnowledgeBasePage />} />
+                        <Route path="/berita/:id" element={<KnowledgeBasePage />} />
+                        <Route path="/tentang" element={<AboutPage />} />
+                        <Route path="/admin" element={<AdminPage />} />
+                    </Routes>
+                </main>
+                <Footer />
+            </div>
+        </HashRouter>
+    );
+};
+
+export default App;

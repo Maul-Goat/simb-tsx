@@ -284,6 +284,7 @@ const greenIcon = new L.Icon({
 const CoordinatePickerMap: React.FC<{ value: string; onChange: (value: string) => void }> = ({ value, onChange }) => {
     const [markerPos, setMarkerPos] = useState<L.LatLng | null>(null);
     const mapRef = useRef<L.Map>(null);
+    const indonesiaBounds: L.LatLngBoundsExpression = [[-11, 95], [6, 141]];
 
     const MapEventsHandler = () => {
         useMapEvents({
@@ -310,7 +311,16 @@ const CoordinatePickerMap: React.FC<{ value: string; onChange: (value: string) =
 
     return (
         <div className="h-64 rounded-md overflow-hidden z-0">
-            <MapContainer ref={mapRef} center={[-2.548926, 118.0148634]} zoom={5} style={{ height: '100%', width: '100%' }} worldCopyJump={true} minZoom={2}>
+            <MapContainer 
+                ref={mapRef} 
+                center={[-2.548926, 118.0148634]} 
+                zoom={5} 
+                style={{ height: '100%', width: '100%' }} 
+                worldCopyJump={true} 
+                minZoom={5}
+                maxBounds={indonesiaBounds}
+                maxBoundsViscosity={1.0}
+            >
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
                 <MapEventsHandler />
                 {markerPos && <Marker position={markerPos} icon={greenIcon} />}
