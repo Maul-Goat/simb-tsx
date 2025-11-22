@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { getOfficialLandslideData, getPendingUserReports, addUserReport } from '../data/database';
@@ -56,26 +56,6 @@ const MapInteractionController: React.FC<{
     return null;
 };
 
-// New component to track map bounds for performance optimization
-const MapBoundsUpdater: React.FC<{ setBounds: (bounds: L.LatLngBounds) => void }> = ({ setBounds }) => {
-    const map = useMap();
-    useEffect(() => {
-        if (map) {
-            setBounds(map.getBounds());
-        }
-    }, [map, setBounds]);
-
-    useMapEvents({
-        moveend() {
-            setBounds(map.getBounds());
-        },
-        zoomend() {
-             setBounds(map.getBounds());
-        }
-    });
-    return null;
-};
-
 const MapPage: React.FC = () => {
     const [officialData, setOfficialData] = useState<LandslideFeatureCollection | null>(null);
     const [pendingReports, setPendingReports] = useState<UserReport[]>([]);
@@ -92,7 +72,6 @@ const MapPage: React.FC = () => {
     const formRef = useRef<HTMLDivElement>(null);
     const markerRefs = useRef<Record<number, L.Marker | null>>({});
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
-    const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
 
 
     const fetchData = async () => {
@@ -150,19 +129,11 @@ const MapPage: React.FC = () => {
             }
         }
     };
-    
-    const visibleOfficialMarkers = useMemo(() => {
-        if (!officialData || !bounds) return [];
-        return officialData.features.filter(point => {
-            const latLng = L.latLng(point.geometry.coordinates[1], point.geometry.coordinates[0]);
-            return bounds.contains(latLng);
-        });
-    }, [officialData, bounds]);
 
     return (
-        <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
+        <div className="flex flex-col lg:flex-row">
             {/* Map Section */}
-            <div className="flex-grow h-1/2 lg:h-full relative">
+            <div className="w-full h-[60vh] lg:h-[calc(100vh-80px)] lg:flex-grow relative">
                 {isLoading && (
                     <div className="absolute inset-0 z-[1001] bg-white/70 flex items-center justify-center">
                         <p className="text-text-subtle text-lg">Memuat data peta...</p>
@@ -176,15 +147,13 @@ const MapPage: React.FC = () => {
                     
                     <MapEvents onMapClick={handleMapClick} />
                     <MapInteractionController selectedEventId={selectedEventId} data={officialData} markerRefs={markerRefs} />
-                    <MapBoundsUpdater setBounds={setBounds} />
 
-                    {/* Official Data Markers - Render only visible ones for performance */}
-                    {visibleOfficialMarkers.map(point => (
+                    {/* Official Data Markers */}
+                    {officialData?.features.map(point => (
                         <Marker 
                             key={`official-${point.properties.id}`} 
                             position={[point.geometry.coordinates[1], point.geometry.coordinates[0]]} 
                             icon={orangeIcon}
-                            // FIX: The ref callback should not return a value. Using a block body to ensure it returns void.
                             ref={(el) => { markerRefs.current[point.properties.id] = el; }}
                         >
                             <Popup>
@@ -232,7 +201,7 @@ const MapPage: React.FC = () => {
             </div>
 
             {/* Side Panel Section */}
-            <div ref={formRef} className="w-full lg:w-96 bg-background-secondary overflow-y-auto h-1/2 lg:h-full border-l border-gray-200 flex flex-col">
+            <div ref={formRef} className="w-full lg:w-96 bg-background-secondary lg:h-[calc(100vh-80px)] lg:overflow-y-auto border-l border-gray-200 flex flex-col">
                 {/* Reporting Form */}
                 <div className="p-6 border-b border-gray-200">
                     <h2 className="text-2xl font-poppins font-bold text-text-main">Laporkan Potensi Longsor</h2>
