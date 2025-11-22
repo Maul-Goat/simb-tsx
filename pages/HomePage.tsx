@@ -207,7 +207,7 @@ const HomePage: React.FC = () => {
             </Section>
             
             <Section title="Peta Sebaran Longsor" subtitle="Pantau lokasi kejadian tanah longsor aktif di seluruh Indonesia berdasarkan data terbaru.">
-                <div className="h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative">
+                <div className="h-[500px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 relative z-0">
                     {isLoadingMap ? (
                         <div className="flex items-center justify-center h-full bg-background-tertiary">
                             <p className="text-text-subtle">Memuat Peta...</p>

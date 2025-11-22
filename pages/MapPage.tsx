@@ -216,7 +216,7 @@ const MapPage: React.FC = () => {
             </div>
 
             {/* Side Panel Section */}
-            <div ref={formRef} className="w-full lg:w-96 bg-background-secondary lg:h-[calc(100vh-80px)] lg:overflow-y-auto border-l border-gray-200 flex flex-col">
+            <div ref={formRef} className="w-full lg:w-[450px] bg-background-secondary lg:h-[calc(100vh-80px)] lg:overflow-y-auto border-l border-gray-200 flex flex-col">
                 {/* Reporting Form */}
                 <div className="p-6 border-b border-gray-200">
                     <h2 className="text-2xl font-poppins font-bold text-text-main">Laporkan Potensi Longsor</h2>
