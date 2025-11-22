@@ -12,6 +12,7 @@ import {
     deleteKejadian,
     deleteMateri,
     addBerita,
+    uploadBeritaImage,
     addOfficialLandslide,
     addMateri
 } from '../data/database';
@@ -165,8 +166,10 @@ const BeritaManager: React.FC = () => {
     
     const [judul, setJudul] = useState('');
     const [isi, setIsi] = useState('');
-    const [gambar, setGambar] = useState('');
     const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [sumberUrl, setSumberUrl] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -184,34 +187,86 @@ const BeritaManager: React.FC = () => {
         }
     };
     
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsUploading(true);
         try {
-            await addBerita({ judul, isi, gambar, tanggal });
+            let imageUrl = 'https://picsum.photos/seed/news_default/600/400';
+            if (imageFile) {
+                const uploadedUrl = await uploadBeritaImage(imageFile);
+                if (uploadedUrl) {
+                    imageUrl = uploadedUrl;
+                } else {
+                    throw new Error('Image upload failed to return a URL.');
+                }
+            }
+
+            await addBerita({ judul, isi, gambar: imageUrl, tanggal, sumber_url: sumberUrl });
             alert('Berita berhasil ditambahkan!');
-            setJudul(''); setIsi(''); setGambar(''); setTanggal(new Date().toISOString().slice(0, 10));
+            
+            setJudul(''); 
+            setIsi(''); 
+            setSumberUrl('');
+            setImageFile(null);
+            const fileInput = document.getElementById('gambar-berita') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
+            setTanggal(new Date().toISOString().slice(0, 10));
+
             fetchData();
-        } catch (error) { alert('Gagal menambahkan berita.'); }
+        } catch (error) { 
+            console.error(error);
+            alert('Gagal menambahkan berita.'); 
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
         <div>
             <Section title="Tambah Berita Baru">
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
-                    <input type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Berita" className="md:col-span-2 w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
-                    <textarea value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Berita" rows={4} className="md:col-span-2 w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm"></textarea>
-                    <input type="url" value={gambar} onChange={e => setGambar(e.target.value)} placeholder="URL Gambar (opsional)" className="md:col-span-2 w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
-                    <button type="submit" className="md:col-span-2 w-full bg-brand-primary text-white font-semibold py-2 rounded-lg hover:bg-brand-primary-hover">Tambah Berita</button>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                             <label htmlFor="tanggal-berita" className="block text-sm font-medium text-text-main mb-1">Tanggal</label>
+                             <input id="tanggal-berita" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
+                        </div>
+                        <div>
+                             <label htmlFor="judul-berita" className="block text-sm font-medium text-text-main mb-1">Judul Berita</label>
+                             <input id="judul-berita" type="text" value={judul} onChange={e => setJudul(e.target.value)} required placeholder="Judul Berita" className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
+                        </div>
+                    </div>
+                     <div>
+                        <label htmlFor="isi-berita" className="block text-sm font-medium text-text-main mb-1">Isi Berita</label>
+                        <textarea id="isi-berita" value={isi} onChange={e => setIsi(e.target.value)} required placeholder="Isi Berita" rows={4} className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm"></textarea>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="gambar-berita" className="block text-sm font-medium text-text-main mb-1">Unggah Gambar</label>
+                            <input id="gambar-berita" type="file" accept="image/*" onChange={handleFileChange} className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-subtle file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20" />
+                        </div>
+                        <div>
+                            <label htmlFor="sumber-url-berita" className="block text-sm font-medium text-text-main mb-1">URL Sumber (opsional)</label>
+                            <input id="sumber-url-berita" type="url" value={sumberUrl} onChange={e => setSumberUrl(e.target.value)} placeholder="https://contoh.com/berita-asli" className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm" />
+                        </div>
+                    </div>
+                    <button type="submit" disabled={isUploading} className="w-full bg-brand-primary text-white font-semibold py-2.5 rounded-lg hover:bg-brand-primary-hover transition-colors disabled:opacity-50 disabled:cursor-wait">
+                        {isUploading ? 'Mengunggah...' : 'Tambah Berita'}
+                    </button>
                 </form>
             </Section>
             <Section title="Data Berita Tersimpan" className="mt-8">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-background-tertiary"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                        <thead className="bg-background-tertiary"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Judul</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">URL Sumber</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {isLoading ? (<tr><td colSpan={3} className="p-4 text-center">Memuat...</td></tr>) : 
-                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.date}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button></td></tr>))}
+                            {isLoading ? (<tr><td colSpan={4} className="p-4 text-center">Memuat...</td></tr>) : 
+                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.title}</td><td className="px-4 py-2 text-sm">{item.date}</td><td className="px-4 py-2 text-sm max-w-xs truncate"><a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">{item.sourceUrl}</a></td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button></td></tr>))}
                         </tbody>
                     </table>
                 </div>

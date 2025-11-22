@@ -16,11 +16,21 @@ const getSupabaseClient = (): SupabaseClient => {
     return supabase;
 };
 
+// --- DATABASE AND STORAGE SETUP ---
+// For image uploads, you need to create a public Storage bucket in your Supabase project.
+// 1. Go to your Supabase project dashboard.
+// 2. Click on the Storage icon in the left sidebar.
+// 3. Click "New bucket".
+// 4. Name the bucket `berita-images` and check the "Public bucket" option.
+// 5. Click "Create bucket".
+//
+// For the news source URL, you need to add a new column to your `berita` table.
+// 1. Go to the Table Editor in your Supabase project.
+// 2. Select the `berita` table.
+// 3. Click "+ Add column".
+// 4. Name the column `sumber_url`, set its type to `text`, and allow it to be `NULLABLE`.
+// 5. Click "Save".
 
-// NOTE: The database schema provided does not contain a table for official disaster events with casualty details.
-// We are assuming a table 'kejadian_longsor' exists with the following columns for this functionality:
-// id, tanggal, lokasi, lat, lng, provinsi, korban_meninggal, korban_luka, rumah_rusak, sumber, deskripsi
-// This table is essential for the map, stats, and detailed data table features.
 
 // --- DATA GETTERS ---
 
@@ -41,14 +51,37 @@ export const getNewsData = async (): Promise<NewsArticle[]> => {
         date: new Date(item.tanggal).toISOString().split('T')[0],
         category: item.kategori || 'Berita',
         content: item.isi || 'Konten lengkap tidak tersedia.',
+        sourceUrl: item.sumber_url,
     }));
+};
+
+export const getNewsArticleById = async (id: number): Promise<NewsArticle | null> => {
+    const client = getSupabaseClient();
+    if (!client) return null;
+
+    const { data, error } = await client.from('berita').select('*').eq('id_berita', id).single();
+    if (error) {
+        console.error('Error fetching single news article:', error);
+        return null; // Don't throw, just return null if not found
+    }
+    if (!data) return null;
+
+    return {
+        id: data.id_berita,
+        title: data.judul,
+        summary: data.isi ? data.isi.substring(0, 120) + '...' : 'Ringkasan tidak tersedia.',
+        image: data.gambar || 'https://picsum.photos/seed/news_default/600/400',
+        date: new Date(data.tanggal).toISOString().split('T')[0],
+        category: data.kategori || 'Berita',
+        content: data.isi || 'Konten lengkap tidak tersedia.',
+        sourceUrl: data.sumber_url,
+    };
 };
 
 export const getOfficialLandslideData = async (): Promise<LandslideFeatureCollection> => {
     const client = getSupabaseClient();
     if (!client) return { type: "FeatureCollection", features: [] };
 
-    // Assuming 'kejadian_longsor' exists
     const { data, error } = await client.from('kejadian_longsor').select('*');
     if (error) {
         console.error('Error fetching official landslide data:', error);
@@ -78,7 +111,6 @@ export const getDetailedLandslideData = async (): Promise<DetailedLandslideEvent
     const client = getSupabaseClient();
     if (!client) return [];
 
-    // Assuming 'kejadian_longsor' exists
     const { data, error } = await client.from('kejadian_longsor').select('*').order('tanggal', { ascending: false });
     if (error) {
         console.error('Error fetching detailed landslide data:', error);
@@ -106,7 +138,6 @@ export const getPendingUserReports = async (): Promise<UserReport[]> => {
     const client = getSupabaseClient();
     if (!client) return [];
 
-    // Maps to 'baru' status in the database schema
     const { data, error } = await client.from('laporan').select('*').eq('status', 'baru');
     if (error) {
         console.error('Error fetching pending reports:', error);
@@ -143,9 +174,30 @@ export const getKnowledgeData = async (): Promise<KnowledgeArticle[]> => {
     }));
 };
 
-// --- DATA MUTATIONS ---
+// --- DATA MUTATIONS & STORAGE ---
 
-export const addBerita = async (berita: { judul: string; isi: string; gambar: string; tanggal: string; }): Promise<any> => {
+export const uploadBeritaImage = async (file: File): Promise<string | null> => {
+    const client = getSupabaseClient();
+    if (!client) throw new Error("Supabase not configured");
+
+    const fileName = `public/news-image-${Date.now()}-${file.name}`;
+    const { error: uploadError } = await client.storage
+        .from('berita-images')
+        .upload(fileName, file);
+
+    if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw uploadError;
+    }
+
+    const { data } = client.storage
+        .from('berita-images')
+        .getPublicUrl(fileName);
+
+    return data.publicUrl;
+};
+
+export const addBerita = async (berita: { judul: string; isi: string; gambar: string; tanggal: string; sumber_url?: string; }): Promise<any> => {
     const client = getSupabaseClient();
     if (!client) throw new Error("Supabase not configured");
 
@@ -153,7 +205,8 @@ export const addBerita = async (berita: { judul: string; isi: string; gambar: st
         judul: berita.judul,
         isi: berita.isi,
         gambar: berita.gambar,
-        tanggal: berita.tanggal
+        tanggal: berita.tanggal,
+        sumber_url: berita.sumber_url
     });
     if (error) {
         console.error('Error adding news:', error);

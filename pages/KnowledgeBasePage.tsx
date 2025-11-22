@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { getNewsData, getKnowledgeData } from '../data/database';
+import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
+import { getNewsData, getKnowledgeData, getNewsArticleById } from '../data/database';
 import { NewsArticle, KnowledgeArticle } from '../types';
 import { Pagination } from './HomePage';
-import { XIcon } from '../constants';
-
 
 type Tab = 'Berita' | 'Pengetahuan' | 'Longsor';
 
@@ -30,21 +28,68 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
     </button>
 );
 
-const NewsDetailModal: React.FC<{ article: NewsArticle; onClose: () => void }> = ({ article, onClose }) => {
-    return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-background-secondary rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10 bg-white/50 backdrop-blur-sm rounded-full p-2">
-                    <XIcon />
+const NewsArticleDetail: React.FC<{ articleId: string }> = ({ articleId }) => {
+    const [article, setArticle] = useState<NewsArticle | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchArticle = async () => {
+            setIsLoading(true);
+            try {
+                const id = parseInt(articleId, 10);
+                if (isNaN(id)) {
+                    setArticle(null);
+                    return;
+                }
+                const data = await getNewsArticleById(id);
+                setArticle(data);
+            } catch (error) {
+                console.error("Failed to fetch article details:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchArticle();
+    }, [articleId]);
+
+    if (isLoading) {
+        return <div className="text-center py-20">Memuat artikel...</div>;
+    }
+
+    if (!article) {
+        return (
+            <div className="text-center py-20">
+                <h2 className="text-2xl font-bold font-poppins">Artikel Tidak Ditemukan</h2>
+                <p className="text-text-subtle mt-2">Artikel yang Anda cari mungkin telah dihapus atau tidak ada.</p>
+                <button onClick={() => navigate('/pengetahuan#berita')} className="mt-6 bg-brand-primary text-white font-poppins font-medium px-6 py-2 rounded-lg hover:bg-brand-primary-hover">
+                    Kembali ke Daftar Berita
                 </button>
-                <img className="w-full h-64 object-cover rounded-t-2xl" src={article.image} alt={article.title} />
-                <div className="p-8">
-                    <p className="text-sm text-brand-primary font-semibold uppercase">{article.category}</p>
-                    <h2 className="text-3xl font-poppins font-bold text-text-main mt-2">{article.title}</h2>
-                    <p className="text-sm text-text-subtle mt-2">{article.date}</p>
-                    <div className="prose max-w-none mt-6 text-text-subtle">
-                        <p>{article.content}</p>
+            </div>
+        );
+    }
+    
+    return (
+        <div className="max-w-4xl mx-auto bg-background-secondary rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <img className="w-full h-64 md:h-96 object-cover" src={article.image} alt={article.title} />
+            <div className="p-6 sm:p-10">
+                <p className="text-sm text-brand-primary font-semibold uppercase">{article.category}</p>
+                <h1 className="text-3xl md:text-4xl font-poppins font-bold text-text-main mt-2">{article.title}</h1>
+                <p className="text-sm text-text-subtle mt-4">{new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <div className="prose max-w-none mt-8 text-text-subtle leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br />') }} />
+                
+                {article.sourceUrl && (
+                    <div className="mt-10 pt-6 border-t border-gray-200">
+                        <h3 className="text-sm font-poppins font-semibold text-text-main">SUMBER BERITA</h3>
+                        <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-brand-primary hover:underline break-all">
+                            {article.sourceUrl}
+                        </a>
                     </div>
+                )}
+                 <div className="mt-8 pt-6 border-t border-gray-200">
+                     <button onClick={() => navigate('/pengetahuan#berita')} className="text-brand-primary font-poppins font-medium hover:underline">
+                        &larr; Kembali ke Semua Berita
+                    </button>
                 </div>
             </div>
         </div>
@@ -55,7 +100,6 @@ const NewsSection: React.FC = () => {
     const [newsData, setNewsData] = useState<NewsArticle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedNews, setSelectedNews] = useState<NewsArticle | null>(null);
     const articlesPerPage = 6;
 
     useEffect(() => {
@@ -76,42 +120,30 @@ const NewsSection: React.FC = () => {
     const totalPages = Math.ceil(newsData.length / articlesPerPage);
     const currentArticles = newsData.slice((currentPage - 1) * articlesPerPage, currentPage * articlesPerPage);
 
-    const handleReadMore = (id: number) => {
-        const article = newsData.find(a => a.id === id);
-        if (article) setSelectedNews(article);
-    };
-
-    const handleCloseModal = () => {
-        setSelectedNews(null);
-    };
-
     if (isLoading) {
         return <div className="text-center p-8">Memuat berita...</div>;
     }
 
     return (
-        <>
-            {selectedNews && <NewsDetailModal article={selectedNews} onClose={handleCloseModal} />}
-            <div className="space-y-8">
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {currentArticles.map(article => (
-                        <div key={article.id} className="bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-1 transition-transform duration-300 flex flex-col group">
-                            <img className="h-48 w-full object-cover" src={article.image} alt={article.title} />
-                            <div className="p-6 flex flex-col flex-grow">
-                                <p className="text-xs text-brand-primary font-semibold uppercase">{article.category}</p>
-                                <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
-                                <p className="mt-2 text-sm text-text-subtle line-clamp-3">{article.summary}</p>
-                                <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">{article.date}</span>
-                                    <button onClick={() => handleReadMore(article.id)} className="text-sm font-poppins font-medium text-brand-primary hover:underline">Baca Selengkapnya</button>
-                                </div>
+        <div className="space-y-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {currentArticles.map(article => (
+                     <Link to={`/berita/${article.id}`} key={article.id} className="bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-1 transition-transform duration-300 flex flex-col group">
+                        <img className="h-48 w-full object-cover" src={article.image} alt={article.title} />
+                        <div className="p-6 flex flex-col flex-grow">
+                            <p className="text-xs text-brand-primary font-semibold uppercase">{article.category}</p>
+                            <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
+                            <p className="mt-2 text-sm text-text-subtle line-clamp-3">{article.summary}</p>
+                            <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                                <span className="text-sm text-gray-500">{article.date}</span>
+                                <span className="text-sm font-poppins font-medium text-brand-primary group-hover:underline">Baca Selengkapnya</span>
                             </div>
                         </div>
-                    ))}
-                </div>
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                    </Link>
+                ))}
             </div>
-        </>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        </div>
     );
 };
 
@@ -138,16 +170,22 @@ const KnowledgeContent: React.FC<{ articles: KnowledgeArticle[] }> = ({ articles
     );
 };
 
-
 const KnowledgeBasePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('Longsor');
     const [allKnowledge, setAllKnowledge] = useState<KnowledgeArticle[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     
+    const { id: articleId } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Don't fetch knowledge data if we are showing an article
+        if(articleId) {
+            setIsLoading(false);
+            return;
+        }
+
         const fetchData = async () => {
             setIsLoading(true);
             try {
@@ -160,9 +198,11 @@ const KnowledgeBasePage: React.FC = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [articleId]);
 
     useEffect(() => {
+        if (articleId) return; // Don't manage tabs on article detail page
+
         const hash = location.hash.substring(1); // remove #
         switch (hash) {
             case 'berita':
@@ -176,7 +216,18 @@ const KnowledgeBasePage: React.FC = () => {
                 setActiveTab('Longsor');
                 break;
         }
-    }, [location.hash]);
+    }, [location.hash, articleId]);
+
+    // If an article ID is present in the URL, render the detail page
+    if (articleId) {
+        return (
+            <div className="bg-background-primary min-h-screen">
+                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <NewsArticleDetail articleId={articleId} />
+                </div>
+            </div>
+        );
+    }
 
     const renderContent = () => {
         if (isLoading) {

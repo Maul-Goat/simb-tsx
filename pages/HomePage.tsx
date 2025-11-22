@@ -68,8 +68,8 @@ const HeroCarousel: React.FC = () => {
     );
 };
 
-const NewsCard: React.FC<{ article: NewsArticle; onReadMore: (id: number) => void }> = ({ article, onReadMore }) => (
-    <div className="bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-2 transition-transform duration-300 flex flex-col group">
+const NewsCard: React.FC<{ article: NewsArticle }> = ({ article }) => (
+    <Link to={`/berita/${article.id}`} className="bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-2 transition-transform duration-300 flex flex-col group">
         <div className="overflow-hidden">
             <img className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300" src={article.image} alt={article.title} />
         </div>
@@ -77,9 +77,9 @@ const NewsCard: React.FC<{ article: NewsArticle; onReadMore: (id: number) => voi
             <p className="text-sm text-brand-primary font-semibold">{article.date}</p>
             <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
             <p className="mt-2 text-sm text-text-subtle">{article.summary}</p>
-            <button onClick={() => onReadMore(article.id)} className="mt-4 text-sm font-poppins font-medium text-brand-primary hover:underline hover:text-brand-primary-hover transition-colors duration-200 text-left">Baca Selengkapnya</button>
+            <div className="mt-4 text-sm font-poppins font-medium text-brand-primary group-hover:underline group-hover:text-brand-primary-hover transition-colors duration-200 text-left">Baca Selengkapnya</div>
         </div>
-    </div>
+    </Link>
 );
 
 const WarningBanner: React.FC = () => {
@@ -100,27 +100,6 @@ const WarningBanner: React.FC = () => {
     )
 }
 
-const NewsDetailModal: React.FC<{ article: NewsArticle; onClose: () => void }> = ({ article, onClose }) => {
-    return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-background-secondary rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10 bg-white/50 backdrop-blur-sm rounded-full p-2">
-                    <XIcon />
-                </button>
-                <img className="w-full h-64 object-cover rounded-t-2xl" src={article.image} alt={article.title} />
-                <div className="p-8">
-                    <p className="text-sm text-brand-primary font-semibold uppercase">{article.category}</p>
-                    <h2 className="text-3xl font-poppins font-bold text-text-main mt-2">{article.title}</h2>
-                    <p className="text-sm text-text-subtle mt-2">{article.date}</p>
-                    <div className="prose max-w-none mt-6 text-text-subtle">
-                        <p>{article.content}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 export const Pagination: React.FC<{ currentPage: number, totalPages: number, onPageChange: (page: number) => void }> = ({ currentPage, totalPages, onPageChange }) => (
     <div className="flex justify-center items-center space-x-2 mt-8">
         <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="p-2 rounded-md bg-white border border-gray-300 disabled:opacity-50 hover:bg-gray-100 transition-colors"><ChevronLeftIcon /></button>
@@ -133,7 +112,6 @@ export const Pagination: React.FC<{ currentPage: number, totalPages: number, onP
 const HomePage: React.FC = () => {
     const [newsData, setNewsData] = useState<NewsArticle[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedNews, setSelectedNews] = useState<NewsArticle | null>(null);
     const [landslideData, setLandslideData] = useState<LandslideFeatureCollection | null>(null);
     const [stats, setStats] = useState({ totalKejadian: 0, korbanJiwa: 0, provinsiTerdampak: 0 });
     const [isLoadingMap, setIsLoadingMap] = useState(true);
@@ -189,20 +167,8 @@ const HomePage: React.FC = () => {
     const totalPages = Math.ceil(newsData.length / articlesPerPage);
     const currentArticles = newsData.slice((currentPage - 1) * articlesPerPage, currentPage * articlesPerPage);
 
-    const handleReadMore = (id: number) => {
-        const article = newsData.find(a => a.id === id);
-        if (article) {
-            setSelectedNews(article);
-        }
-    };
-
-    const handleCloseModal = () => {
-        setSelectedNews(null);
-    };
-
     return (
         <div className="bg-background-primary">
-             {selectedNews && <NewsDetailModal article={selectedNews} onClose={handleCloseModal} />}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <WarningBanner />
                 <HeroCarousel />
@@ -214,7 +180,7 @@ const HomePage: React.FC = () => {
                 ) : (
                     <>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {currentArticles.map(article => <NewsCard key={article.id} article={article} onReadMore={handleReadMore} />)}
+                            {currentArticles.map(article => <NewsCard key={article.id} article={article} />)}
                         </div>
                         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                         <div className="text-center mt-8">

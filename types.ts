@@ -7,6 +7,7 @@ export interface NewsArticle {
   date: string;
   category: string;
   content: string;
+  sourceUrl?: string;
 }
 
 export interface LandslideDataPoint {

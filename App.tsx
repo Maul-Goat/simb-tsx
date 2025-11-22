@@ -203,11 +203,9 @@ const App: React.FC = () => {
                         <Route path="/peta" element={<MapPage />} />
                         <Route path="/statistik" element={<StatsPage />} />
                         <Route path="/pengetahuan" element={<KnowledgeBasePage />} />
+                        <Route path="/berita/:id" element={<KnowledgeBasePage />} />
                         <Route path="/tentang" element={<AboutPage />} />
                         <Route path="/admin" element={<AdminPage />} />
-                        {/* A detail page would be better, but we cannot create new files.
-                        <Route path="/berita/:id" element={<NewsDetailPage />} /> 
-                        */}
                     </Routes>
                 </main>
                 <Footer />
