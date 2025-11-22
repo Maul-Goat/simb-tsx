@@ -139,7 +139,7 @@ const MapPage: React.FC = () => {
                         <p className="text-text-subtle text-lg">Memuat data peta...</p>
                     </div>
                 )}
-                <MapContainer center={[-2.548926, 118.0148634]} zoom={5} scrollWheelZoom={true} style={{ height: '100%', width: '100%', backgroundColor: '#FDFBF7' }}>
+                <MapContainer center={[-2.548926, 118.0148634]} zoom={5} scrollWheelZoom={true} style={{ height: '100%', width: '100%', backgroundColor: '#FDFBF7' }} worldCopyJump={true}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
