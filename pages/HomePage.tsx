@@ -68,19 +68,37 @@ const HeroCarousel: React.FC = () => {
     );
 };
 
-const NewsCard: React.FC<{ article: NewsArticle }> = ({ article }) => (
-    <Link to={`/berita/${article.id}`} className="bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-2 transition-transform duration-300 flex flex-col group">
-        <div className="overflow-hidden">
-            <img className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300" src={article.image} alt={article.title} />
-        </div>
-        <div className="p-6 flex flex-col flex-grow">
-            <p className="text-sm text-brand-primary font-semibold">{article.date}</p>
-            <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
-            <p className="mt-2 text-sm text-text-subtle">{article.summary}</p>
-            <div className="mt-4 text-sm font-poppins font-medium text-brand-primary group-hover:underline group-hover:text-brand-primary-hover transition-colors duration-200 text-left">Baca Selengkapnya</div>
-        </div>
-    </Link>
-);
+const NewsCard: React.FC<{ article: NewsArticle }> = ({ article }) => {
+    const commonClasses = "bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-2 transition-transform duration-300 flex flex-col group";
+    
+    const cardContent = (
+        <>
+            <div className="overflow-hidden">
+                <img className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300" src={article.image} alt={article.title} />
+            </div>
+            <div className="p-6 flex flex-col flex-grow">
+                <p className="text-sm text-brand-primary font-semibold">{article.date}</p>
+                <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
+                <p className="mt-2 text-sm text-text-subtle">{article.summary}</p>
+                <div className="mt-4 text-sm font-poppins font-medium text-brand-primary group-hover:underline group-hover:text-brand-primary-hover transition-colors duration-200 text-left">Baca Selengkapnya</div>
+            </div>
+        </>
+    );
+
+    if (article.sourceUrl) {
+        return (
+            <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className={commonClasses}>
+                {cardContent}
+            </a>
+        );
+    }
+
+    return (
+        <Link to={`/berita/${article.id}`} className={commonClasses}>
+            {cardContent}
+        </Link>
+    );
+};
 
 const WarningBanner: React.FC = () => {
     const [isVisible, setIsVisible] = useState(true);

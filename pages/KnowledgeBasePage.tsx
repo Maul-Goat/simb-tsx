@@ -127,20 +127,37 @@ const NewsSection: React.FC = () => {
     return (
         <div className="space-y-8">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {currentArticles.map(article => (
-                     <Link to={`/berita/${article.id}`} key={article.id} className="bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-1 transition-transform duration-300 flex flex-col group">
-                        <img className="h-48 w-full object-cover" src={article.image} alt={article.title} />
-                        <div className="p-6 flex flex-col flex-grow">
-                            <p className="text-xs text-brand-primary font-semibold uppercase">{article.category}</p>
-                            <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
-                            <p className="mt-2 text-sm text-text-subtle line-clamp-3">{article.summary}</p>
-                            <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                                <span className="text-sm text-gray-500">{article.date}</span>
-                                <span className="text-sm font-poppins font-medium text-brand-primary group-hover:underline">Baca Selengkapnya</span>
+                {currentArticles.map(article => {
+                    const commonClasses = "bg-background-secondary rounded-2xl overflow-hidden shadow-lg border border-gray-200 transform hover:-translate-y-1 transition-transform duration-300 flex flex-col group";
+                    const cardContent = (
+                        <>
+                            <img className="h-48 w-full object-cover" src={article.image} alt={article.title} />
+                            <div className="p-6 flex flex-col flex-grow">
+                                <p className="text-xs text-brand-primary font-semibold uppercase">{article.category}</p>
+                                <h3 className="mt-2 text-lg font-poppins font-semibold text-text-main flex-grow">{article.title}</h3>
+                                <p className="mt-2 text-sm text-text-subtle line-clamp-3">{article.summary}</p>
+                                <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                                    <span className="text-sm text-gray-500">{article.date}</span>
+                                    <span className="text-sm font-poppins font-medium text-brand-primary group-hover:underline">Baca Selengkapnya</span>
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                ))}
+                        </>
+                    );
+
+                    if (article.sourceUrl) {
+                        return (
+                             <a href={article.sourceUrl} key={article.id} target="_blank" rel="noopener noreferrer" className={commonClasses}>
+                                {cardContent}
+                            </a>
+                        );
+                    }
+                    
+                    return (
+                        <Link to={`/berita/${article.id}`} key={article.id} className={commonClasses}>
+                           {cardContent}
+                        </Link>
+                    );
+                })}
             </div>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
