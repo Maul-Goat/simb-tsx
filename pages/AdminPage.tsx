@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { 
     getPendingUserReports, 
     approveUserReport, 
@@ -115,9 +117,13 @@ const LaporanManager: React.FC = () => {
                                 <div className="font-semibold text-text-main font-poppins">{report.name}</div>
                                 <div className="text-xs text-text-subtle mb-2">ID Laporan: {report.id}</div>
                                 <p className="text-sm text-text-main my-2 break-words">&quot;{report.description}&quot;</p>
-                                {(report.korban_jiwa !== undefined && report.korban_jiwa > 0) && (
-                                     <p className="text-sm text-status-warning font-semibold mb-2">Korban Jiwa: {report.korban_jiwa}</p>
-                                )}
+                                
+                                <div className="text-sm space-y-1 mb-2">
+                                    {(report.korban_jiwa || 0) > 0 && <p className="font-semibold text-status-warning">Korban Jiwa: {report.korban_jiwa}</p>}
+                                    {(report.korban_luka || 0) > 0 && <p className="font-semibold text-status-highlight">Korban Luka: {report.korban_luka}</p>}
+                                    {(report.rumah_rusak || 0) > 0 && <p className="font-semibold text-text-subtle">Rumah Rusak: {report.rumah_rusak}</p>}
+                                </div>
+
                                 <a 
                                     href={`https://www.google.com/maps?q=${report.latlng[0]},${report.latlng[1]}`} 
                                     target="_blank" 
@@ -214,6 +220,50 @@ const BeritaManager: React.FC = () => {
     );
 };
 
+const greenIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+const CoordinatePickerMap: React.FC<{ value: string; onChange: (value: string) => void }> = ({ value, onChange }) => {
+    const [markerPos, setMarkerPos] = useState<L.LatLng | null>(null);
+    const mapRef = useRef<L.Map>(null);
+
+    const MapEventsHandler = () => {
+        useMapEvents({
+            click(e) {
+                setMarkerPos(e.latlng);
+                onChange(`${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`);
+            },
+        });
+        return null;
+    };
+
+    useEffect(() => {
+        if (value) {
+            const coords = value.split(',').map(c => parseFloat(c.trim()));
+            if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+                const latlng = new L.LatLng(coords[0], coords[1]);
+                setMarkerPos(latlng);
+                if (mapRef.current) {
+                    mapRef.current.flyTo(latlng, 10);
+                }
+            }
+        }
+    }, [value]);
+
+    return (
+        <div className="h-64 rounded-md overflow-hidden z-0">
+            <MapContainer ref={mapRef} center={[-2.548926, 118.0148634]} zoom={5} style={{ height: '100%', width: '100%' }}>
+                <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+                <MapEventsHandler />
+                {markerPos && <Marker position={markerPos} icon={greenIcon} />}
+            </MapContainer>
+        </div>
+    );
+};
+
 const KejadianManager: React.FC = () => {
     const [data, setData] = useState<DetailedLandslideEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -221,9 +271,9 @@ const KejadianManager: React.FC = () => {
     const [lokasi, setLokasi] = useState('');
     const [coordinates, setCoordinates] = useState('');
     const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
-    const [korbanMeninggal, setKorbanMeninggal] = useState<number | ''>(0);
-    const [korbanLuka, setKorbanLuka] = useState<number | ''>(0);
-    const [rumahRusak, setRumahRusak] = useState<number | ''>(0);
+    const [korbanMeninggal, setKorbanMeninggal] = useState<number | ''>('');
+    const [korbanLuka, setKorbanLuka] = useState<number | ''>('');
+    const [rumahRusak, setRumahRusak] = useState<number | ''>('');
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -259,7 +309,7 @@ const KejadianManager: React.FC = () => {
             
             alert('Data kejadian berhasil ditambahkan!');
             setLokasi(''); setCoordinates(''); setTanggal(new Date().toISOString().slice(0,10));
-            setKorbanMeninggal(0); setKorbanLuka(0); setRumahRusak(0);
+            setKorbanMeninggal(''); setKorbanLuka(''); setRumahRusak('');
 
             fetchData();
         } catch (err) { alert('Gagal menambahkan data.'); console.error(err); }
@@ -268,43 +318,66 @@ const KejadianManager: React.FC = () => {
     return (
         <div>
             <Section title="Tambah Kejadian Bencana Resmi">
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4">
-                    <div>
-                        <label htmlFor="tanggal-kejadian" className="block text-sm font-medium text-text-main mb-1">Tanggal Kejadian</label>
-                        <input id="tanggal-kejadian" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    </div>
-                    <div>
-                        <label htmlFor="lokasi-kejadian" className="block text-sm font-medium text-text-main mb-1">Nama Lokasi</label>
-                        <input id="lokasi-kejadian" type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label htmlFor="koordinat-kejadian" className="block text-sm font-medium text-text-main mb-1">Koordinat</label>
-                        <input id="koordinat-kejadian" type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Contoh: -6.59, 106.8" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="tanggal-kejadian" className="block text-sm font-medium text-text-main mb-1">Tanggal Kejadian</label>
+                            <input id="tanggal-kejadian" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                        </div>
+                        <div>
+                            <label htmlFor="lokasi-kejadian" className="block text-sm font-medium text-text-main mb-1">Nama Lokasi</label>
+                            <input id="lokasi-kejadian" type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                        </div>
                     </div>
                      <div>
-                        <label htmlFor="korban-meninggal" className="block text-sm font-medium text-text-main mb-1">Korban Meninggal</label>
-                        <input id="korban-meninggal" type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(e.target.value === '' ? '' : parseInt(e.target.value, 10))} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                        <label htmlFor="koordinat-kejadian" className="block text-sm font-medium text-text-main mb-1">Koordinat (klik peta atau isi manual)</label>
+                        <CoordinatePickerMap value={coordinates} onChange={setCoordinates} />
+                        <input id="koordinat-kejadian" type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Contoh: -6.59, 106.8" className="w-full bg-background-primary border p-2 rounded-md text-sm mt-2" />
                     </div>
-                    <div>
-                        <label htmlFor="korban-luka" className="block text-sm font-medium text-text-main mb-1">Korban Luka</label>
-                        <input id="korban-luka" type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(e.target.value === '' ? '' : parseInt(e.target.value, 10))} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div>
+                            <label htmlFor="korban-meninggal" className="block text-sm font-medium text-text-main mb-1">Korban Meninggal</label>
+                            <input id="korban-meninggal" type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                        </div>
+                        <div>
+                            <label htmlFor="korban-luka" className="block text-sm font-medium text-text-main mb-1">Korban Luka</label>
+                            <input id="korban-luka" type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                        </div>
+                        <div>
+                            <label htmlFor="rumah-rusak" className="block text-sm font-medium text-text-main mb-1">Rumah Rusak</label>
+                            <input id="rumah-rusak" type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                        </div>
                     </div>
-                    <div>
-                        <label htmlFor="rumah-rusak" className="block text-sm font-medium text-text-main mb-1">Rumah Rusak</label>
-                        <input id="rumah-rusak" type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(e.target.value === '' ? '' : parseInt(e.target.value, 10))} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    </div>
-                    <div className="md:col-span-2">
-                        <button type="submit" className="w-full bg-brand-primary text-white font-semibold py-2.5 rounded-lg hover:bg-brand-primary-hover mt-2 transition-colors">Tambah Kejadian</button>
-                    </div>
+                    <button type="submit" className="w-full bg-brand-primary text-white font-semibold py-2.5 rounded-lg hover:bg-brand-primary-hover mt-2 transition-colors">Tambah Kejadian</button>
                 </form>
             </Section>
             <Section title="Data Kejadian Tersimpan" className="mt-8">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-background-tertiary"><tr><th className="px-4 py-2 text-left text-xs font-bold uppercase">Lokasi</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Meninggal</th><th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th></tr></thead>
+                        <thead className="bg-background-tertiary">
+                            <tr>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Lokasi</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Meninggal</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Luka</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Rumah Rusak</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Aksi</th>
+                            </tr>
+                        </thead>
                          <tbody className="bg-white divide-y divide-gray-200">
-                            {isLoading ? (<tr><td colSpan={4} className="p-4 text-center">Memuat...</td></tr>) : 
-                             data.map(item => (<tr key={item.id}><td className="px-4 py-2 text-sm">{item.lokasi}</td><td className="px-4 py-2 text-sm">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID')}</td><td className="px-4 py-2 text-sm text-center">{item.meninggal}</td><td className="px-4 py-2 text-sm"><button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button></td></tr>))}
+                            {isLoading ? (<tr><td colSpan={6} className="p-4 text-center">Memuat...</td></tr>) : 
+                             data.map(item => (
+                                 <tr key={item.id}>
+                                    <td className="px-4 py-2 text-sm">{item.lokasi}</td>
+                                    <td className="px-4 py-2 text-sm whitespace-nowrap">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID')}</td>
+                                    <td className="px-4 py-2 text-sm text-center">{item.meninggal}</td>
+                                    <td className="px-4 py-2 text-sm text-center">{item.terluka}</td>
+                                    <td className="px-4 py-2 text-sm text-center">{item.rumahRusak}</td>
+                                    <td className="px-4 py-2 text-sm">
+                                        <button onClick={() => handleDelete(item.id)} className="text-status-warning hover:underline">Hapus</button>
+                                    </td>
+                                </tr>
+                             ))}
                         </tbody>
                     </table>
                 </div>

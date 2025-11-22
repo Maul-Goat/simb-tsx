@@ -118,6 +118,8 @@ export const getPendingUserReports = async (): Promise<UserReport[]> => {
         status: 'pending',
         photo: item.foto,
         korban_jiwa: item.korban_jiwa || 0,
+        korban_luka: item.korban_luka || 0,
+        rumah_rusak: item.rumah_rusak || 0,
     }));
 };
 
@@ -186,6 +188,8 @@ export const addUserReport = async (report: Omit<UserReport, 'id' | 'status' | '
         isi_laporan: report.description,
         status: 'baru', // 'pending' on the frontend is 'baru' in the DB
         korban_jiwa: report.korban_jiwa,
+        korban_luka: report.korban_luka,
+        rumah_rusak: report.rumah_rusak,
     });
     if (error) {
         console.error('Error adding user report:', error);
@@ -245,8 +249,8 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
         sumber: `Laporan Masyarakat (${report.nama_pelapor})`,
         provinsi: 'N/A',
         korban_meninggal: report.korban_jiwa || 0,
-        korban_luka: 0,
-        rumah_rusak: 0,
+        korban_luka: report.korban_luka || 0,
+        rumah_rusak: report.rumah_rusak || 0,
     });
     if (insertError) {
         console.error('Error creating official event from report:', insertError);
