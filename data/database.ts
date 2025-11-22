@@ -279,7 +279,7 @@ export const rejectUserReport = async (reportId: number): Promise<boolean> => {
 
     // In our schema, 'selesai' means the report is processed, regardless of outcome.
     // For a more robust system, a 'ditolak' status would be better.
-    const { data, error } = await client.from('laporan').update({ status: 'selesai' }).eq('id_laporan', reportId);
+    const { error } = await client.from('laporan').update({ status: 'selesai' }).eq('id_laporan', reportId);
     if (error) {
         console.error('Error rejecting report:', error);
         return false;
