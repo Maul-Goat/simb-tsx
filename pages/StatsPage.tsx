@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
 import { getDetailedLandslideData } from '../data/database';
 import { DetailedLandslideEvent, ProvinceStat } from '../types';
 
@@ -41,6 +41,31 @@ const SortableTableHeader: React.FC<{
     );
 };
 
+const renderActiveShape = (props: any) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent } = props;
+
+    return (
+        <g>
+            <text x={cx} y={cy} dy={-6} textAnchor="middle" fill="#3D2C21" className="text-lg font-poppins font-bold">
+                {payload.name}
+            </text>
+             <text x={cx} y={cy} dy={20} textAnchor="middle" fill={fill} className="text-xl font-poppins font-semibold">
+                {`${(percent * 100).toFixed(0)}%`}
+            </text>
+            <Sector
+                cx={cx}
+                cy={cy}
+                innerRadius={innerRadius}
+                outerRadius={outerRadius + 8}
+                startAngle={startAngle}
+                endAngle={endAngle}
+                fill={fill}
+                stroke={fill}
+                strokeWidth={2}
+            />
+        </g>
+    );
+};
 
 const StatsPage: React.FC = () => {
     const COLORS = ['#4A6C6F', '#E9A229', '#5CB85C', '#6E5E54', '#D9534F', '#3D2C21'];
@@ -48,6 +73,8 @@ const StatsPage: React.FC = () => {
     const [detailedData, setDetailedData] = useState<DetailedLandslideEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [sortConfig, setSortConfig] = useState<{ key: keyof DetailedLandslideEvent; direction: 'ascending' | 'descending' } | null>({ key: 'tanggalKejadian', direction: 'descending' });
+    // FIX: Initialize activeIndex with undefined instead of null to match recharts prop type.
+    const [activeIndex, setActiveIndex] = useState<number | undefined>();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -76,7 +103,6 @@ const StatsPage: React.FC = () => {
             });
         }
         
-        // Aggregate data for charts
         const monthlyAggregation: { [key: string]: { name: string, kejadian: number } } = {};
         const provinceAggregation: { [key: string]: number } = {};
         
@@ -87,7 +113,6 @@ const StatsPage: React.FC = () => {
             const year = date.getFullYear();
             const month = date.toLocaleString('id-ID', { month: 'short' });
             
-            // Monthly aggregation
             if (year === currentYear || year === currentYear - 1) {
                 const key = `${year}-${month}`;
                 if (!monthlyAggregation[key]) {
@@ -96,8 +121,7 @@ const StatsPage: React.FC = () => {
                 monthlyAggregation[key].kejadian++;
             }
             
-            // Province aggregation
-            const province = event.provinsi || 'Lainnya';
+            const province = event.provinsi || 'N/A';
             provinceAggregation[province] = (provinceAggregation[province] || 0) + 1;
         });
         
@@ -124,6 +148,11 @@ const StatsPage: React.FC = () => {
         }
         setSortConfig({ key, direction });
     };
+    
+    // FIX: Remove unnecessary dependency from useCallback, as state setters are stable.
+    const onPieEnter = useCallback((_: any, index: number) => {
+        setActiveIndex(index);
+    }, []);
 
     return (
         <div className="bg-background-primary min-h-screen">
@@ -203,20 +232,23 @@ const StatsPage: React.FC = () => {
                     <section className="bg-background-secondary p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
                         <h2 className="text-2xl font-poppins font-semibold text-text-main text-center mb-6">Distribusi Kejadian per Provinsi</h2>
                         <ResponsiveContainer width="100%" height={400}>
-                            <PieChart>
+                            {/* FIX: Use undefined to reset the active index on mouse leave. */}
+                            <PieChart onMouseLeave={() => setActiveIndex(undefined)}>
                                 <Pie
+                                    activeIndex={activeIndex}
+                                    activeShape={renderActiveShape}
                                     data={provinceDistribution as any}
                                     cx="50%"
                                     cy="50%"
-                                    labelLine={false}
+                                    innerRadius={80}
                                     outerRadius={150}
                                     fill="#8884d8"
                                     dataKey="value"
                                     nameKey="name"
-                                    label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    onMouseEnter={onPieEnter}
                                 >
                                     {provinceDistribution.map((_entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke={COLORS[index % COLORS.length]} />
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#FDFBF7" strokeWidth={2} />
                                     ))}
                                 </Pie>
                                 <Tooltip content={<CustomTooltip />} />
