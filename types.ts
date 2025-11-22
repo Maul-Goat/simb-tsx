@@ -58,13 +58,11 @@ export interface UserReport {
 export interface DetailedLandslideEvent {
   id: number;
   no: number;
-  idKabupaten: string;
   tanggalKejadian: string;
   kejadian: string;
   lokasi: string;
   provinsi: string;
   meninggal: number;
-  hilang: number;
   terluka: number;
   rumahRusak: number;
   rumahTerendam: number;

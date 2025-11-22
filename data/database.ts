@@ -119,13 +119,11 @@ export const getDetailedLandslideData = async (): Promise<DetailedLandslideEvent
     return data.map((item: any, index: number) => ({
         id: item.id,
         no: index + 1,
-        idKabupaten: item.id_kabupaten || 'N/A',
         tanggalKejadian: new Date(item.tanggal).toISOString(),
         kejadian: "TANAH LONGSOR",
         lokasi: item.lokasi,
         provinsi: item.provinsi,
         meninggal: item.korban_meninggal,
-        hilang: item.korban_hilang || 0,
         terluka: item.korban_luka,
         rumahRusak: item.rumah_rusak,
         rumahTerendam: 0,
@@ -273,8 +271,6 @@ export const addOfficialLandslide = async (data: NewLandslideAdminData): Promise
     const client = getSupabaseClient();
     if (!client) throw new Error("Supabase not configured");
     
-    // FIX: Include id_kabupaten and korban_hilang with default values to prevent insertion errors
-    // if the database schema requires them and they are not provided by the form.
     const { data: result, error } = await client.from('kejadian_longsor').insert({
         lokasi: data.lokasi,
         tanggal: data.tanggal,
@@ -286,8 +282,6 @@ export const addOfficialLandslide = async (data: NewLandslideAdminData): Promise
         rumah_rusak: data.kerusakan_rumah,
         sumber: 'Admin Input',
         provinsi: data.lokasi.split(',').pop()?.trim() || 'N/A',
-        id_kabupaten: 0, // Default value
-        korban_hilang: 0, // Default value
     });
     if (error) {
         console.error('Error adding official landslide:', error);
@@ -308,7 +302,6 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
     }
 
     // 2. Add a corresponding entry to the official 'kejadian_longsor' table
-    // FIX: Include id_kabupaten and korban_hilang with default values to align with the database schema.
     const { error: insertError } = await client.from('kejadian_longsor').insert({
         lokasi: `Laporan dari ${report.nama_pelapor} di ${report.lokasi}`,
         tanggal: new Date().toISOString().split('T')[0],
@@ -320,8 +313,6 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
         korban_meninggal: report.korban_jiwa || 0,
         korban_luka: report.korban_luka || 0,
         rumah_rusak: report.rumah_rusak || 0,
-        id_kabupaten: 0, // Default value
-        korban_hilang: 0, // Default value
     });
     if (insertError) {
         console.error('Error creating official event from report:', insertError);
