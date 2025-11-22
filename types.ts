@@ -1,4 +1,5 @@
 
+
 export interface NewsArticle {
   id: number;
   title: string;
@@ -50,9 +51,9 @@ export interface UserReport {
   description: string;
   status: 'pending' | 'approved' | 'rejected';
   photo?: string;
-  korban_jiwa?: number;
-  korban_luka?: number;
-  rumah_rusak?: number;
+  korbanMeninggal?: number;
+  korbanLuka?: number;
+  rumahRusak?: number;
 }
 
 export interface DetailedLandslideEvent {

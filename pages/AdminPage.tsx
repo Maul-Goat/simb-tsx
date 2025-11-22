@@ -119,10 +119,10 @@ const LaporanManager: React.FC = () => {
                                 <div className="text-xs text-text-subtle mb-2">ID Laporan: {report.id}</div>
                                 <p className="text-sm text-text-main my-2 break-words">&quot;{report.description}&quot;</p>
                                 
-                                <div className="text-sm space-y-1 mb-2">
-                                    {(report.korban_jiwa || 0) > 0 && <p className="font-semibold text-status-warning">Korban Jiwa: {report.korban_jiwa}</p>}
-                                    {(report.korban_luka || 0) > 0 && <p className="font-semibold text-status-highlight">Korban Luka: {report.korban_luka}</p>}
-                                    {(report.rumah_rusak || 0) > 0 && <p className="font-semibold text-text-subtle">Rumah Rusak: {report.rumah_rusak}</p>}
+                                <div className="text-xs text-text-subtle space-y-1 my-2">
+                                    <div>Meninggal: <strong>{report.korbanMeninggal || 0}</strong></div>
+                                    <div>Luka: <strong>{report.korbanLuka || 0}</strong></div>
+                                    <div>Rumah Rusak: <strong>{report.rumahRusak || 0}</strong></div>
                                 </div>
 
                                 <a 

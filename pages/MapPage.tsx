@@ -64,9 +64,10 @@ const MapPage: React.FC = () => {
     const [newReportLocation, setNewReportLocation] = useState<L.LatLng | null>(null);
     const [reporterName, setReporterName] = useState('');
     const [reportDescription, setReportDescription] = useState('');
-    const [reportCasualties, setReportCasualties] = useState<number | ''>(0);
-    const [reportInjured, setReportInjured] = useState<number | ''>(0);
-    const [reportDamagedHomes, setReportDamagedHomes] = useState<number | ''>(0);
+    const [korbanMeninggal, setKorbanMeninggal] = useState<number | ''>('');
+    const [korbanLuka, setKorbanLuka] = useState<number | ''>('');
+    const [rumahRusak, setRumahRusak] = useState<number | ''>('');
+
 
     const formRef = useRef<HTMLDivElement>(null);
     const markerRefs = useRef<Record<number, L.Marker | null>>({});
@@ -106,18 +107,18 @@ const MapPage: React.FC = () => {
                     latlng: [newReportLocation.lat, newReportLocation.lng],
                     name: reporterName,
                     description: reportDescription,
-                    korban_jiwa: Number(reportCasualties) || 0,
-                    korban_luka: Number(reportInjured) || 0,
-                    rumah_rusak: Number(reportDamagedHomes) || 0,
+                    korbanMeninggal: Number(korbanMeninggal) || 0,
+                    korbanLuka: Number(korbanLuka) || 0,
+                    rumahRusak: Number(rumahRusak) || 0,
                 });
                 alert('Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.');
                 // Reset form
                 setNewReportLocation(null);
                 setReporterName('');
                 setReportDescription('');
-                setReportCasualties(0);
-                setReportInjured(0);
-                setReportDamagedHomes(0);
+                setKorbanMeninggal('');
+                setKorbanLuka('');
+                setRumahRusak('');
                 // Refresh data on map
                 await fetchData();
             } catch (error) {
@@ -176,9 +177,9 @@ const MapPage: React.FC = () => {
                                     <h4 className="font-bold text-base mb-1 text-status-highlight">Laporan Potensi Longsor (Pending)</h4>
                                     <p className="text-xs"><strong>Pelapor:</strong> {report.name}</p>
                                     <p className="text-xs mt-1"><strong>Deskripsi:</strong> {report.description}</p>
-                                    <p className="text-xs mt-1"><strong>Korban Jiwa:</strong> {report.korban_jiwa || 0}</p>
-                                    <p className="text-xs mt-1"><strong>Korban Luka:</strong> {report.korban_luka || 0}</p>
-                                    <p className="text-xs mt-1"><strong>Rumah Rusak:</strong> {report.rumah_rusak || 0}</p>
+                                    <p className="text-xs">Korban Jiwa: {report.korbanMeninggal || 0}</p>
+                                    <p className="text-xs">Korban Luka: {report.korbanLuka || 0}</p>
+                                    <p className="text-xs">Rumah Rusak: {report.rumahRusak || 0}</p>
                                     <p className="text-xs font-semibold mt-2">Sumber: Laporan Masyarakat</p>
                                 </div>
                             </Popup>
@@ -239,18 +240,18 @@ const MapPage: React.FC = () => {
                                 className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main placeholder-gray-400 focus:ring-brand-primary focus:border-brand-primary"
                             ></textarea>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                             <div>
+                                <label htmlFor="korban-meninggal-report" className="block text-sm font-medium text-text-main mb-1">Meninggal</label>
+                                <input id="korban-meninggal-report" type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                            </div>
                             <div>
-                                <label htmlFor="casualties" className="block text-sm font-medium text-text-main mb-1">Korban Jiwa</label>
-                                <input type="number" id="casualties" min="0" value={reportCasualties} onChange={(e) => setReportCasualties(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main" />
+                                <label htmlFor="korban-luka-report" className="block text-sm font-medium text-text-main mb-1">Luka</label>
+                                <input id="korban-luka-report" type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
                             </div>
-                             <div>
-                                <label htmlFor="injured" className="block text-sm font-medium text-text-main mb-1">Korban Luka</label>
-                                <input type="number" id="injured" min="0" value={reportInjured} onChange={(e) => setReportInjured(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main" />
-                            </div>
-                             <div>
-                                <label htmlFor="damaged" className="block text-sm font-medium text-text-main mb-1">Rumah Rusak</label>
-                                <input type="number" id="damaged" min="0" value={reportDamagedHomes} onChange={(e) => setReportDamagedHomes(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main" />
+                            <div>
+                                <label htmlFor="rumah-rusak-report" className="block text-sm font-medium text-text-main mb-1">Rumah Rusak</label>
+                                <input id="rumah-rusak-report" type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
                             </div>
                         </div>
                         <button 
