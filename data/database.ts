@@ -235,23 +235,29 @@ export const addUserReport = async (report: Omit<UserReport, 'id' | 'status' | '
     const client = getSupabaseClient();
     if (!client) throw new Error("Supabase not configured");
 
-    const { data, error } = await client.from('laporan').insert({
-        nama_pelapor: report.name,
-        lat: report.latlng[0],
-        lng: report.latlng[1],
-        lokasi: `(${report.latlng[0].toFixed(4)}, ${report.latlng[1].toFixed(4)})`,
-        isi_laporan: report.description,
-        status: 'baru', // 'pending' on the frontend is 'baru' in the DB
-        korban_jiwa: report.korban_jiwa,
-        korban_luka: report.korban_luka,
-        rumah_rusak: report.rumah_rusak,
-    });
-    if (error) {
-        console.error('Error adding user report:', error);
-        throw error;
+    try {
+        const { data, error } = await client.from('laporan').insert({
+            nama_pelapor: report.name,
+            lat: report.latlng[0],
+            lng: report.latlng[1],
+            lokasi: `(${report.latlng[0].toFixed(4)}, ${report.latlng[1].toFixed(4)})`,
+            isi_laporan: report.description,
+            status: 'baru', // 'pending' on the frontend is 'baru' in the DB
+            korban_jiwa: report.korban_jiwa,
+            korban_luka: report.korban_luka,
+            rumah_rusak: report.rumah_rusak,
+        });
+        if (error) {
+            console.error('Error adding user report:', error);
+            throw error;
+        }
+        return data;
+    } catch (err) {
+        console.error("Caught error in addUserReport:", err);
+        throw err;
     }
-    return data;
 };
+
 
 interface NewLandslideAdminData {
     lokasi: string;
@@ -267,6 +273,8 @@ export const addOfficialLandslide = async (data: NewLandslideAdminData): Promise
     const client = getSupabaseClient();
     if (!client) throw new Error("Supabase not configured");
     
+    // FIX: Include id_kabupaten and korban_hilang with default values to prevent insertion errors
+    // if the database schema requires them and they are not provided by the form.
     const { data: result, error } = await client.from('kejadian_longsor').insert({
         lokasi: data.lokasi,
         tanggal: data.tanggal,
@@ -278,8 +286,8 @@ export const addOfficialLandslide = async (data: NewLandslideAdminData): Promise
         rumah_rusak: data.kerusakan_rumah,
         sumber: 'Admin Input',
         provinsi: data.lokasi.split(',').pop()?.trim() || 'N/A',
-        id_kabupaten: 'N/A',
-        korban_hilang: 0
+        id_kabupaten: 0, // Default value
+        korban_hilang: 0, // Default value
     });
     if (error) {
         console.error('Error adding official landslide:', error);
@@ -300,6 +308,7 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
     }
 
     // 2. Add a corresponding entry to the official 'kejadian_longsor' table
+    // FIX: Include id_kabupaten and korban_hilang with default values to align with the database schema.
     const { error: insertError } = await client.from('kejadian_longsor').insert({
         lokasi: `Laporan dari ${report.nama_pelapor} di ${report.lokasi}`,
         tanggal: new Date().toISOString().split('T')[0],
@@ -311,8 +320,8 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
         korban_meninggal: report.korban_jiwa || 0,
         korban_luka: report.korban_luka || 0,
         rumah_rusak: report.rumah_rusak || 0,
-        korban_hilang: 0,
-        id_kabupaten: 'N/A'
+        id_kabupaten: 0, // Default value
+        korban_hilang: 0, // Default value
     });
     if (insertError) {
         console.error('Error creating official event from report:', insertError);

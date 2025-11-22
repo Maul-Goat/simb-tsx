@@ -121,8 +121,8 @@ const MapPage: React.FC = () => {
                 // Refresh data on map
                 await fetchData();
             } catch (error) {
-                console.error("Gagal mengirim laporan:", error);
-                alert("Gagal mengirim laporan. Silakan coba lagi.");
+                alert('Gagal mengirim laporan. Silakan coba lagi.');
+                console.error('Failed to submit report:', error);
             }
         }
     };

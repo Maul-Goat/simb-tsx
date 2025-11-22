@@ -3,6 +3,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { getDetailedLandslideData } from '../data/database';
 import { DetailedLandslideEvent, ProvinceStat } from '../types';
 
+// FIX: The installed @types/recharts version may be missing the 'activeIndex' prop.
+// This patches the Pie component's type to include 'activeIndex' without using ts-ignore.
+const PatchedPie = Pie as React.ComponentType<React.ComponentProps<typeof Pie> & { activeIndex?: number }>;
+
 const PageHeader: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
     <div className="bg-background-secondary py-12 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -66,10 +70,6 @@ const renderActiveShape = (props: any) => {
         </g>
     );
 };
-
-// FIX: The Pie component from recharts is cast to `any` to work around a potential type definition issue
-// where the `activeIndex` prop is not recognized, even though it is a valid and necessary prop for this feature.
-const PieComponent = Pie as any;
 
 const StatsPage: React.FC = () => {
     const COLORS = ['#4A6C6F', '#E9A229', '#5CB85C', '#6E5E54', '#D9534F', '#3D2C21'];
@@ -238,7 +238,7 @@ const StatsPage: React.FC = () => {
                         <ResponsiveContainer width="100%" height={400}>
                             {/* FIX: Use undefined to reset the active index on mouse leave. */}
                             <PieChart onMouseLeave={() => setActiveIndex(undefined)}>
-                                <PieComponent
+                                <PatchedPie
                                     activeIndex={activeIndex}
                                     activeShape={renderActiveShape}
                                     data={provinceDistribution as any}
@@ -254,7 +254,7 @@ const StatsPage: React.FC = () => {
                                     {provinceDistribution.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#FDFBF7" strokeWidth={2} />
                                     ))}
-                                </PieComponent>
+                                </PatchedPie>
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend wrapperStyle={{ color: '#3D2C21' }}/>
                             </PieChart>
