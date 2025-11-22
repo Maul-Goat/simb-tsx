@@ -1,6 +1,7 @@
 import React from 'react';
+import { NavLinkItem } from './types';
 
-export const NAV_LINKS = [
+export const NAV_LINKS: NavLinkItem[] = [
     { name: 'Home', path: '/' },
     { name: 'Peta', path: '/peta' },
     { name: 'Statistik', path: '/statistik' },

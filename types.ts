@@ -1,5 +1,14 @@
 
 
+export interface NavLinkItem {
+  name: string;
+  path: string;
+  subLinks?: {
+    name: string;
+    path: string;
+  }[];
+}
+
 export interface NewsArticle {
   id: number;
   title: string;

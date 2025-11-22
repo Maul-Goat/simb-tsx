@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
 import { getNewsData, getKnowledgeData, getNewsArticleById } from './DatabasePage';
 import { NewsArticle, KnowledgeArticle } from '../types';
-import { Pagination } from './HomePage';
+import { Pagination } from '../components/Pagination';
 
 type Tab = 'Berita' | 'Pengetahuan' | 'Longsor';
 
