@@ -277,7 +277,9 @@ export const addOfficialLandslide = async (data: NewLandslideAdminData): Promise
         korban_luka: data.korban_luka,
         rumah_rusak: data.kerusakan_rumah,
         sumber: 'Admin Input',
-        provinsi: data.lokasi.split(',').pop()?.trim() || 'N/A'
+        provinsi: data.lokasi.split(',').pop()?.trim() || 'N/A',
+        id_kabupaten: 'N/A',
+        korban_hilang: 0
     });
     if (error) {
         console.error('Error adding official landslide:', error);
@@ -309,6 +311,8 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
         korban_meninggal: report.korban_jiwa || 0,
         korban_luka: report.korban_luka || 0,
         rumah_rusak: report.rumah_rusak || 0,
+        korban_hilang: 0,
+        id_kabupaten: 'N/A'
     });
     if (insertError) {
         console.error('Error creating official event from report:', insertError);

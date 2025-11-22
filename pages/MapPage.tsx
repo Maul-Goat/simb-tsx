@@ -101,24 +101,29 @@ const MapPage: React.FC = () => {
     const handleSubmitReport = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newReportLocation && reporterName && reportDescription) {
-            await addUserReport({
-                latlng: [newReportLocation.lat, newReportLocation.lng],
-                name: reporterName,
-                description: reportDescription,
-                korban_jiwa: Number(reportCasualties) || 0,
-                korban_luka: Number(reportInjured) || 0,
-                rumah_rusak: Number(reportDamagedHomes) || 0,
-            });
-            alert('Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.');
-            // Reset form
-            setNewReportLocation(null);
-            setReporterName('');
-            setReportDescription('');
-            setReportCasualties(0);
-            setReportInjured(0);
-            setReportDamagedHomes(0);
-            // Refresh data on map
-            await fetchData();
+            try {
+                await addUserReport({
+                    latlng: [newReportLocation.lat, newReportLocation.lng],
+                    name: reporterName,
+                    description: reportDescription,
+                    korban_jiwa: Number(reportCasualties) || 0,
+                    korban_luka: Number(reportInjured) || 0,
+                    rumah_rusak: Number(reportDamagedHomes) || 0,
+                });
+                alert('Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.');
+                // Reset form
+                setNewReportLocation(null);
+                setReporterName('');
+                setReportDescription('');
+                setReportCasualties(0);
+                setReportInjured(0);
+                setReportDamagedHomes(0);
+                // Refresh data on map
+                await fetchData();
+            } catch (error) {
+                console.error("Gagal mengirim laporan:", error);
+                alert("Gagal mengirim laporan. Silakan coba lagi.");
+            }
         }
     };
 

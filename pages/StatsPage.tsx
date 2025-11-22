@@ -67,6 +67,10 @@ const renderActiveShape = (props: any) => {
     );
 };
 
+// FIX: The Pie component from recharts is cast to `any` to work around a potential type definition issue
+// where the `activeIndex` prop is not recognized, even though it is a valid and necessary prop for this feature.
+const PieComponent = Pie as any;
+
 const StatsPage: React.FC = () => {
     const COLORS = ['#4A6C6F', '#E9A229', '#5CB85C', '#6E5E54', '#D9534F', '#3D2C21'];
     
@@ -234,7 +238,7 @@ const StatsPage: React.FC = () => {
                         <ResponsiveContainer width="100%" height={400}>
                             {/* FIX: Use undefined to reset the active index on mouse leave. */}
                             <PieChart onMouseLeave={() => setActiveIndex(undefined)}>
-                                <Pie
+                                <PieComponent
                                     activeIndex={activeIndex}
                                     activeShape={renderActiveShape}
                                     data={provinceDistribution as any}
@@ -250,7 +254,7 @@ const StatsPage: React.FC = () => {
                                     {provinceDistribution.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#FDFBF7" strokeWidth={2} />
                                     ))}
-                                </Pie>
+                                </PieComponent>
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend wrapperStyle={{ color: '#3D2C21' }}/>
                             </PieChart>
