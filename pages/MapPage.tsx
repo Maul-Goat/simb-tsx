@@ -64,7 +64,7 @@ const MapPage: React.FC = () => {
     const [newReportLocation, setNewReportLocation] = useState<L.LatLng | null>(null);
     const [reporterName, setReporterName] = useState('');
     const [reportDescription, setReportDescription] = useState('');
-    const [reportCasualties, setReportCasualties] = useState(0);
+    const [reportCasualties, setReportCasualties] = useState<number | ''>(0);
     const formRef = useRef<HTMLDivElement>(null);
     const markerRefs = useRef<Record<number, L.Marker | null>>({});
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
@@ -102,7 +102,7 @@ const MapPage: React.FC = () => {
                 latlng: [newReportLocation.lat, newReportLocation.lng],
                 name: reporterName,
                 description: reportDescription,
-                korban_jiwa: reportCasualties,
+                korban_jiwa: Number(reportCasualties) || 0,
             });
             alert('Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.');
             // Reset form
@@ -229,7 +229,7 @@ const MapPage: React.FC = () => {
                                 id="casualties"
                                 min="0"
                                 value={reportCasualties}
-                                onChange={(e) => setReportCasualties(parseInt(e.target.value, 10) || 0)}
+                                onChange={(e) => setReportCasualties(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                                 className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main placeholder-gray-400 focus:ring-brand-primary focus:border-brand-primary"
                             />
                         </div>

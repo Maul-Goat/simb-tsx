@@ -221,9 +221,9 @@ const KejadianManager: React.FC = () => {
     const [lokasi, setLokasi] = useState('');
     const [coordinates, setCoordinates] = useState('');
     const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
-    const [korbanMeninggal, setKorbanMeninggal] = useState(0);
-    const [korbanLuka, setKorbanLuka] = useState(0);
-    const [rumahRusak, setRumahRusak] = useState(0);
+    const [korbanMeninggal, setKorbanMeninggal] = useState<number | ''>(0);
+    const [korbanLuka, setKorbanLuka] = useState<number | ''>(0);
+    const [rumahRusak, setRumahRusak] = useState<number | ''>(0);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -248,7 +248,14 @@ const KejadianManager: React.FC = () => {
             const coordsArray = coordinates.split(',').map(coord => parseFloat(coord.trim()));
             if (coordsArray.length !== 2 || isNaN(coordsArray[0]) || isNaN(coordsArray[1])) { alert('Koordinat tidak valid.'); return; }
 
-            await addOfficialLandslide({ lokasi, tanggal, korban_meninggal: korbanMeninggal, korban_luka: korbanLuka, kerusakan_rumah: rumahRusak, coordinates: [coordsArray[0], coordsArray[1]] });
+            await addOfficialLandslide({ 
+                lokasi, 
+                tanggal, 
+                korban_meninggal: Number(korbanMeninggal) || 0, 
+                korban_luka: Number(korbanLuka) || 0, 
+                kerusakan_rumah: Number(rumahRusak) || 0, 
+                coordinates: [coordsArray[0], coordsArray[1]] 
+            });
             
             alert('Data kejadian berhasil ditambahkan!');
             setLokasi(''); setCoordinates(''); setTanggal(new Date().toISOString().slice(0,10));
@@ -261,14 +268,34 @@ const KejadianManager: React.FC = () => {
     return (
         <div>
             <Section title="Tambah Kejadian Bencana Resmi">
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    <input type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Nama Lokasi, Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    <input type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Koordinat, Contoh: -6.59, 106.8" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    <input type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(parseInt(e.target.value))} required placeholder="Rumah Rusak" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    <input type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(parseInt(e.target.value))} required placeholder="Korban Meninggal" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    <input type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(parseInt(e.target.value))} required placeholder="Korban Luka" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
-                    <button type="submit" className="md:col-span-2 w-full bg-brand-primary text-white font-semibold py-2 rounded-lg hover:bg-brand-primary-hover">Tambah Kejadian</button>
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4">
+                    <div>
+                        <label htmlFor="tanggal-kejadian" className="block text-sm font-medium text-text-main mb-1">Tanggal Kejadian</label>
+                        <input id="tanggal-kejadian" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    </div>
+                    <div>
+                        <label htmlFor="lokasi-kejadian" className="block text-sm font-medium text-text-main mb-1">Nama Lokasi</label>
+                        <input id="lokasi-kejadian" type="text" value={lokasi} onChange={e => setLokasi(e.target.value)} required placeholder="Contoh: Kab. Bogor, Jawa Barat" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label htmlFor="koordinat-kejadian" className="block text-sm font-medium text-text-main mb-1">Koordinat</label>
+                        <input id="koordinat-kejadian" type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Contoh: -6.59, 106.8" className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    </div>
+                     <div>
+                        <label htmlFor="korban-meninggal" className="block text-sm font-medium text-text-main mb-1">Korban Meninggal</label>
+                        <input id="korban-meninggal" type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(e.target.value === '' ? '' : parseInt(e.target.value, 10))} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    </div>
+                    <div>
+                        <label htmlFor="korban-luka" className="block text-sm font-medium text-text-main mb-1">Korban Luka</label>
+                        <input id="korban-luka" type="number" min="0" value={korbanLuka} onChange={e => setKorbanLuka(e.target.value === '' ? '' : parseInt(e.target.value, 10))} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    </div>
+                    <div>
+                        <label htmlFor="rumah-rusak" className="block text-sm font-medium text-text-main mb-1">Rumah Rusak</label>
+                        <input id="rumah-rusak" type="number" min="0" value={rumahRusak} onChange={e => setRumahRusak(e.target.value === '' ? '' : parseInt(e.target.value, 10))} required className="w-full bg-background-primary border p-2 rounded-md text-sm" />
+                    </div>
+                    <div className="md:col-span-2">
+                        <button type="submit" className="w-full bg-brand-primary text-white font-semibold py-2.5 rounded-lg hover:bg-brand-primary-hover mt-2 transition-colors">Tambah Kejadian</button>
+                    </div>
                 </form>
             </Section>
             <Section title="Data Kejadian Tersimpan" className="mt-8">
