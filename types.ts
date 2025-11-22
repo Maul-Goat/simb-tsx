@@ -48,6 +48,7 @@ export interface UserReport {
   description: string;
   status: 'pending' | 'approved' | 'rejected';
   photo?: string;
+  korban_jiwa?: number;
 }
 
 export interface DetailedLandslideEvent {

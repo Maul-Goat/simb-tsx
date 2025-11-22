@@ -115,6 +115,9 @@ const LaporanManager: React.FC = () => {
                                 <div className="font-semibold text-text-main font-poppins">{report.name}</div>
                                 <div className="text-xs text-text-subtle mb-2">ID Laporan: {report.id}</div>
                                 <p className="text-sm text-text-main my-2 break-words">&quot;{report.description}&quot;</p>
+                                {(report.korban_jiwa !== undefined && report.korban_jiwa > 0) && (
+                                     <p className="text-sm text-status-warning font-semibold mb-2">Korban Jiwa: {report.korban_jiwa}</p>
+                                )}
                                 <a 
                                     href={`https://www.google.com/maps?q=${report.latlng[0]},${report.latlng[1]}`} 
                                     target="_blank" 

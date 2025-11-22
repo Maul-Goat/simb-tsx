@@ -64,6 +64,7 @@ const MapPage: React.FC = () => {
     const [newReportLocation, setNewReportLocation] = useState<L.LatLng | null>(null);
     const [reporterName, setReporterName] = useState('');
     const [reportDescription, setReportDescription] = useState('');
+    const [reportCasualties, setReportCasualties] = useState(0);
     const formRef = useRef<HTMLDivElement>(null);
     const markerRefs = useRef<Record<number, L.Marker | null>>({});
     const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
@@ -100,13 +101,15 @@ const MapPage: React.FC = () => {
             await addUserReport({
                 latlng: [newReportLocation.lat, newReportLocation.lng],
                 name: reporterName,
-                description: reportDescription
+                description: reportDescription,
+                korban_jiwa: reportCasualties,
             });
             alert('Laporan berhasil dikirim! Terima kasih atas partisipasi Anda.');
             // Reset form
             setNewReportLocation(null);
             setReporterName('');
             setReportDescription('');
+            setReportCasualties(0);
             // Refresh data on map
             await fetchData();
         }
@@ -158,6 +161,7 @@ const MapPage: React.FC = () => {
                                     <h4 className="font-bold text-base mb-1 text-status-highlight">Laporan Potensi Longsor (Pending)</h4>
                                     <p className="text-xs"><strong>Pelapor:</strong> {report.name}</p>
                                     <p className="text-xs mt-1"><strong>Deskripsi:</strong> {report.description}</p>
+                                    <p className="text-xs mt-1"><strong>Korban Jiwa:</strong> {report.korban_jiwa || 0}</p>
                                     <p className="text-xs font-semibold mt-2">Sumber: Laporan Masyarakat</p>
                                 </div>
                             </Popup>
@@ -210,13 +214,24 @@ const MapPage: React.FC = () => {
                             <label htmlFor="description" className="block text-sm font-medium text-text-main mb-1">Deskripsi Kondisi</label>
                             <textarea
                                 id="description"
-                                rows={4}
+                                rows={3}
                                 value={reportDescription}
                                 onChange={(e) => setReportDescription(e.target.value)}
                                 required
                                 placeholder="Contoh: Terlihat retakan tanah di lereng setelah hujan deras."
                                 className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main placeholder-gray-400 focus:ring-brand-primary focus:border-brand-primary"
                             ></textarea>
+                        </div>
+                         <div>
+                            <label htmlFor="casualties" className="block text-sm font-medium text-text-main mb-1">Jumlah Korban Jiwa (opsional)</label>
+                            <input
+                                type="number"
+                                id="casualties"
+                                min="0"
+                                value={reportCasualties}
+                                onChange={(e) => setReportCasualties(parseInt(e.target.value, 10) || 0)}
+                                className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main placeholder-gray-400 focus:ring-brand-primary focus:border-brand-primary"
+                            />
                         </div>
                         <button 
                             type="submit"
