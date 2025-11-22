@@ -248,6 +248,7 @@ const HomePage: React.FC = () => {
                                             <h4 className="font-bold text-base mb-1">{point.properties.lokasi}</h4>
                                             <p className="text-xs">Tanggal: {point.properties.tanggal}</p>
                                             <p className="text-xs">Korban Jiwa: {point.properties.korban_meninggal}</p>
+                                            {point.properties.deskripsi && <p className="text-xs mt-1"><strong>Deskripsi:</strong> {point.properties.deskripsi}</p>}
                                             <p className="text-xs font-semibold mt-1">Sumber: {point.properties.sumber}</p>
                                         </div>
                                     </Popup>

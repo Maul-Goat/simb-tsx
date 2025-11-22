@@ -270,6 +270,7 @@ const KejadianManager: React.FC = () => {
 
     const [lokasi, setLokasi] = useState('');
     const [coordinates, setCoordinates] = useState('');
+    const [deskripsi, setDeskripsi] = useState('');
     const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
     const [korbanMeninggal, setKorbanMeninggal] = useState<number | ''>('');
     const [korbanLuka, setKorbanLuka] = useState<number | ''>('');
@@ -301,6 +302,7 @@ const KejadianManager: React.FC = () => {
             await addOfficialLandslide({ 
                 lokasi, 
                 tanggal, 
+                deskripsi,
                 korban_meninggal: Number(korbanMeninggal) || 0, 
                 korban_luka: Number(korbanLuka) || 0, 
                 kerusakan_rumah: Number(rumahRusak) || 0, 
@@ -309,6 +311,7 @@ const KejadianManager: React.FC = () => {
             
             alert('Data kejadian berhasil ditambahkan!');
             setLokasi(''); setCoordinates(''); setTanggal(new Date().toISOString().slice(0,10));
+            setDeskripsi('');
             setKorbanMeninggal(''); setKorbanLuka(''); setRumahRusak('');
 
             fetchData();
@@ -334,6 +337,17 @@ const KejadianManager: React.FC = () => {
                         <CoordinatePickerMap value={coordinates} onChange={setCoordinates} />
                         <input id="koordinat-kejadian" type="text" value={coordinates} onChange={e => setCoordinates(e.target.value)} required placeholder="Contoh: -6.59, 106.8" className="w-full bg-background-primary border p-2 rounded-md text-sm mt-2" />
                     </div>
+                    <div>
+                        <label htmlFor="deskripsi-kejadian" className="block text-sm font-medium text-text-main mb-1">Deskripsi Kejadian (opsional)</label>
+                        <textarea 
+                            id="deskripsi-kejadian" 
+                            rows={3} 
+                            value={deskripsi} 
+                            onChange={e => setDeskripsi(e.target.value)} 
+                            placeholder="Contoh: Longsor terjadi setelah hujan lebat selama 3 hari, menutup akses jalan utama."
+                            className="w-full bg-background-primary border p-2 rounded-md text-sm" 
+                        />
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                          <div>
                             <label htmlFor="korban-meninggal" className="block text-sm font-medium text-text-main mb-1">Korban Meninggal</label>
@@ -357,6 +371,7 @@ const KejadianManager: React.FC = () => {
                         <thead className="bg-background-tertiary">
                             <tr>
                                 <th className="px-4 py-2 text-left text-xs font-bold uppercase">Lokasi</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold uppercase">Deskripsi</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold uppercase">Tanggal</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold uppercase">Meninggal</th>
                                 <th className="px-4 py-2 text-left text-xs font-bold uppercase">Luka</th>
@@ -365,10 +380,11 @@ const KejadianManager: React.FC = () => {
                             </tr>
                         </thead>
                          <tbody className="bg-white divide-y divide-gray-200">
-                            {isLoading ? (<tr><td colSpan={6} className="p-4 text-center">Memuat...</td></tr>) : 
+                            {isLoading ? (<tr><td colSpan={7} className="p-4 text-center">Memuat...</td></tr>) : 
                              data.map(item => (
                                  <tr key={item.id}>
                                     <td className="px-4 py-2 text-sm">{item.lokasi}</td>
+                                    <td className="px-4 py-2 text-sm max-w-xs truncate" title={item.deskripsi}>{item.deskripsi}</td>
                                     <td className="px-4 py-2 text-sm whitespace-nowrap">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID')}</td>
                                     <td className="px-4 py-2 text-sm text-center">{item.meninggal}</td>
                                     <td className="px-4 py-2 text-sm text-center">{item.terluka}</td>

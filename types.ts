@@ -19,6 +19,7 @@ export interface LandslideDataPoint {
     korban_luka: number;
     kerusakan_rumah: number;
     sumber: string;
+    deskripsi?: string;
   };
   geometry: {
     type: "Point";
@@ -67,6 +68,7 @@ export interface DetailedLandslideEvent {
   rumahRusak: number;
   rumahTerendam: number;
   fasumRusak: number;
+  deskripsi: string;
 }
 
 export interface KnowledgeArticle {

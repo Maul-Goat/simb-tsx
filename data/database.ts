@@ -19,7 +19,7 @@ const getSupabaseClient = (): SupabaseClient => {
 
 // NOTE: The database schema provided does not contain a table for official disaster events with casualty details.
 // We are assuming a table 'kejadian_longsor' exists with the following columns for this functionality:
-// id, tanggal, lokasi, lat, lng, provinsi, korban_meninggal, korban_luka, rumah_rusak, sumber
+// id, tanggal, lokasi, lat, lng, provinsi, korban_meninggal, korban_luka, rumah_rusak, sumber, deskripsi
 // This table is essential for the map, stats, and detailed data table features.
 
 // --- DATA GETTERS ---
@@ -64,6 +64,7 @@ export const getOfficialLandslideData = async (): Promise<LandslideFeatureCollec
             korban_luka: item.korban_luka,
             kerusakan_rumah: item.rumah_rusak,
             sumber: item.sumber || "BNPB",
+            deskripsi: item.deskripsi || '',
         },
         geometry: {
             type: "Point",
@@ -97,6 +98,7 @@ export const getDetailedLandslideData = async (): Promise<DetailedLandslideEvent
         rumahRusak: item.rumah_rusak,
         rumahTerendam: 0,
         fasumRusak: 0,
+        deskripsi: item.deskripsi || '',
     }));
 };
 
@@ -201,6 +203,7 @@ export const addUserReport = async (report: Omit<UserReport, 'id' | 'status' | '
 interface NewLandslideAdminData {
     lokasi: string;
     tanggal: string;
+    deskripsi: string;
     korban_meninggal: number;
     korban_luka: number;
     kerusakan_rumah: number;
@@ -214,6 +217,7 @@ export const addOfficialLandslide = async (data: NewLandslideAdminData): Promise
     const { data: result, error } = await client.from('kejadian_longsor').insert({
         lokasi: data.lokasi,
         tanggal: data.tanggal,
+        deskripsi: data.deskripsi,
         lat: data.coordinates[0],
         lng: data.coordinates[1],
         korban_meninggal: data.korban_meninggal,
@@ -244,6 +248,7 @@ export const approveUserReport = async (reportId: number): Promise<boolean> => {
     const { error: insertError } = await client.from('kejadian_longsor').insert({
         lokasi: `Laporan dari ${report.nama_pelapor} di ${report.lokasi}`,
         tanggal: new Date().toISOString().split('T')[0],
+        deskripsi: report.isi_laporan,
         lat: report.lat,
         lng: report.lng,
         sumber: `Laporan Masyarakat (${report.nama_pelapor})`,
@@ -274,7 +279,7 @@ export const rejectUserReport = async (reportId: number): Promise<boolean> => {
 
     // In our schema, 'selesai' means the report is processed, regardless of outcome.
     // For a more robust system, a 'ditolak' status would be better.
-    const { error } = await client.from('laporan').update({ status: 'selesai' }).eq('id_laporan', reportId);
+    const { data, error } = await client.from('laporan').update({ status: 'selesai' }).eq('id_laporan', reportId);
     if (error) {
         console.error('Error rejecting report:', error);
         return false;

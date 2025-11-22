@@ -145,6 +145,7 @@ const StatsPage: React.FC = () => {
                                         <SortableTableHeader column="no" label="No." sortConfig={sortConfig} requestSort={requestSort} />
                                         <SortableTableHeader column="tanggalKejadian" label="Tanggal" sortConfig={sortConfig} requestSort={requestSort} />
                                         <SortableTableHeader column="lokasi" label="Lokasi" sortConfig={sortConfig} requestSort={requestSort} />
+                                        <SortableTableHeader column="deskripsi" label="Deskripsi" sortConfig={sortConfig} requestSort={requestSort} />
                                         <SortableTableHeader column="provinsi" label="Provinsi" sortConfig={sortConfig} requestSort={requestSort} />
                                         <SortableTableHeader column="meninggal" label="Meninggal" sortConfig={sortConfig} requestSort={requestSort} />
                                         <SortableTableHeader column="terluka" label="Terluka" sortConfig={sortConfig} requestSort={requestSort} />
@@ -157,6 +158,7 @@ const StatsPage: React.FC = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-text-subtle">{item.no}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{new Date(item.tanggalKejadian).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{item.lokasi}</td>
+                                            <td className="px-6 py-4 text-sm text-text-main max-w-xs truncate" title={item.deskripsi}>{item.deskripsi}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-text-main">{item.provinsi}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.meninggal}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-center">{item.terluka}</td>

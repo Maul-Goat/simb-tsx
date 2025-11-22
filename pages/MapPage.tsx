@@ -156,6 +156,7 @@ const MapPage: React.FC = () => {
                                     <p className="text-xs">Korban Jiwa: {point.properties.korban_meninggal}</p>
                                     <p className="text-xs">Korban Luka: {point.properties.korban_luka}</p>
                                     <p className="text-xs">Rumah Rusak: {point.properties.kerusakan_rumah}</p>
+                                    {point.properties.deskripsi && <p className="text-xs mt-1"><strong>Deskripsi:</strong> {point.properties.deskripsi}</p>}
                                     <p className="text-xs font-semibold mt-2">Sumber: {point.properties.sumber}</p>
                                 </div>
                             </Popup>
@@ -186,9 +187,9 @@ const MapPage: React.FC = () => {
                 {/* Map Legend */}
                 <div className="absolute bottom-4 right-4 z-[1000] bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200">
                     <h4 className="font-poppins font-semibold text-sm mb-2 text-text-main">Legenda</h4>
-                    <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-brand-primary rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Data Resmi</span></div>
-                    <div className="flex items-center space-x-2 mt-1"><div className="w-4 h-4 bg-status-highlight rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Laporan (Pending)</span></div>
-                     <div className="flex items-center space-x-2 mt-1"><div className="w-4 h-4 bg-status-info rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Lokasi Laporan Baru</span></div>
+                    <div className="flex items-center space-x-2"><div className="w-4 h-4 bg-orange-500 rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Data Resmi</span></div>
+                    <div className="flex items-center space-x-2 mt-1"><div className="w-4 h-4 bg-blue-500 rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Laporan (Pending)</span></div>
+                     <div className="flex items-center space-x-2 mt-1"><div className="w-4 h-4 bg-green-500 rounded-full border border-gray-400"></div><span className="text-xs text-text-subtle">Lokasi Laporan Baru</span></div>
                 </div>
             </div>
 
