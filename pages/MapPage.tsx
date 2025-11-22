@@ -139,7 +139,7 @@ const MapPage: React.FC = () => {
                         <p className="text-text-subtle text-lg">Memuat data peta...</p>
                     </div>
                 )}
-                <MapContainer center={[-2.548926, 118.0148634]} zoom={5} scrollWheelZoom={true} style={{ height: '100%', width: '100%', backgroundColor: '#FDFBF7' }} worldCopyJump={true}>
+                <MapContainer center={[-2.548926, 118.0148634]} zoom={5} scrollWheelZoom={true} style={{ height: '100%', width: '100%', backgroundColor: '#FDFBF7' }} worldCopyJump={true} minZoom={2}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -241,7 +241,7 @@ const MapPage: React.FC = () => {
                                 className="w-full bg-background-primary border border-gray-300 rounded-md p-2 text-sm text-text-main placeholder-gray-400 focus:ring-brand-primary focus:border-brand-primary"
                             ></textarea>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                              <div>
                                 <label htmlFor="korban-meninggal-report" className="block text-sm font-medium text-text-main mb-1">Meninggal</label>
                                 <input id="korban-meninggal-report" type="number" min="0" value={korbanMeninggal} onChange={e => setKorbanMeninggal(e.target.value === '' ? '' : parseInt(e.target.value, 10))} className="w-full bg-background-primary border p-2 rounded-md text-sm" />
