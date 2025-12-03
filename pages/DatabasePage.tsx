@@ -16,23 +16,6 @@ const getSupabaseClient = (): SupabaseClient => {
     return supabase;
 };
 
-// --- DATABASE AND STORAGE SETUP ---
-// For image uploads, you need to create a public Storage bucket in your Supabase project.
-// 1. Go to your Supabase project dashboard.
-// 2. Click on the Storage icon in the left sidebar.
-// 3. Click "New bucket".
-// 4. Name the bucket `berita-images` and check the "Public bucket" option.
-// 5. Click "Create bucket".
-//
-// For the news source URL, you need to add a new column to your `berita` table.
-// 1. Go to the Table Editor in your Supabase project.
-// 2. Select the `berita` table.
-// 3. Click "+ Add column".
-// 4. Name the column `sumber_url`, set its type to `text`, and allow it to be `NULLABLE`.
-// 5. Click "Save".
-
-
-// --- DATA GETTERS ---
 
 export const getNewsData = async (): Promise<NewsArticle[]> => {
     const client = getSupabaseClient();
