@@ -48,7 +48,7 @@ const HeroCarousel: React.FC = () => {
                 fadeEffect={{ crossFade: true }}
             >
                 {[
-                    { img: "https://picsum.photos/seed/hero1/1920/1080", title: "Pemantauan Real-Time", sub: "Data tanah longsor terkini dari sumber terpercaya di seluruh Indonesia." },
+                    { img: "https://i.pinimg.com/1200x/06/2d/f8/062df81b5ce419c76a8fde1c7af2e89f.jpg", title: "Pemantauan Real-Time", sub: "Data tanah longsor terkini dari sumber terpercaya di seluruh Indonesia." },
                     { img: "https://picsum.photos/seed/hero2/1920/1080", title: "Edukasi & Mitigasi", sub: "Pahami penyebab, jenis, dan cara pencegahan tanah longsor." },
                     { img: "https://picsum.photos/seed/hero3/1920/1080", title: "Statistik & Analisis", sub: "Visualisasi data kejadian, korban, dan wilayah terdampak." },
                 ].map((slide, index) => (
