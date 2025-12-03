@@ -49,8 +49,8 @@ const HeroCarousel: React.FC = () => {
             >
                 {[
                     { img: "https://i.pinimg.com/1200x/06/2d/f8/062df81b5ce419c76a8fde1c7af2e89f.jpg", title: "Pemantauan Real-Time", sub: "Data tanah longsor terkini dari sumber terpercaya di seluruh Indonesia." },
-                    { img: "https://picsum.photos/seed/hero2/1920/1080", title: "Edukasi & Mitigasi", sub: "Pahami penyebab, jenis, dan cara pencegahan tanah longsor." },
-                    { img: "https://picsum.photos/seed/hero3/1920/1080", title: "Statistik & Analisis", sub: "Visualisasi data kejadian, korban, dan wilayah terdampak." },
+                    { img: "https://i.pinimg.com/736x/a7/06/45/a70645d668d176ea4182bb77bddb166f.jpg", title: "Edukasi & Mitigasi", sub: "Pahami penyebab, jenis, dan cara pencegahan tanah longsor." },
+                    { img: "https://i.pinimg.com/1200x/ad/a7/74/ada774d649178763df3b5c625dcfa429.jpg", title: "Statistik & Analisis", sub: "Visualisasi data kejadian, korban, dan wilayah terdampak." },
                 ].map((slide, index) => (
                     <SwiperSlide key={index}>
                         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.img})` }}></div>
